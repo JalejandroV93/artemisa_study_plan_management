@@ -1,0 +1,74 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ev_teachers_app
+    ports:
+      - '8100:3000'
+    environment:
+      - DATABASE_URL=postgresql://user:password@db:5432/ev_teachers_db
+      - REDIS_URL=redis://redis:6379
+      - NODE_ENV=production
+    env_file:
+      - .env
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+
+  worker:
+      build:
+        context: .
+        dockerfile: Dockerfile
+      container_name: ev_teachers_worker
+      environment:
+        - DATABASE_URL=postgresql://user:password@db:5432/ev_teachers_db
+        - REDIS_URL=redis://redis:6379
+        - NODE_ENV=production
+      env_file:
+        - .env
+      depends_on:
+        db:
+          condition: service_healthy
+        redis:
+          condition: service_healthy
+      command: sh -c "npm run prisma:migrate && npx ts-node -r tsconfig-paths/register worker.ts"
+      restart: unless-stopped
+  db:
+    image: postgres:16-alpine
+    container_name: ev_teachers_db
+    ports:
+      - '8101:5432'
+    environment:
+      - POSTGRES_USER=user
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=ev_teachers_db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U user -d ev_teachers_db"]
+      interval: 10s
+      retries: 5
+      timeout: 5s
+
+  redis:
+    image: redis:7-alpine
+    container_name: ev_teachers_redis
+    ports:
+      - '8102:6379'
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres_data:
+  redis_data:

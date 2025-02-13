@@ -1,0 +1,112 @@
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+
+model Subject {
+  id         Int          @id @default(autoincrement())
+  name       String
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @updatedAt
+
+  studyPlan  StudyPlan?
+}
+
+model StudyPlan {
+  id                  Int               @id @default(autoincrement())
+  subjectId           Int               @unique
+  vision              String?           // opcional
+  mission             String?           // opcional
+  generalObjective    String?           // opcional
+  specificObjectives  String?           // puede ser JSON (o String) según el requerimiento
+  didactics           String?           // opcional
+  crossCuttingProjects String?          // opcional
+  createdAt           DateTime          @default(now())
+  updatedAt           DateTime          @updatedAt
+
+  subject             Subject           @relation(fields: [subjectId], references: [id])
+  gradeOfferings      GradeOffering[]
+  activityLogs        ActivityLog[]     // Relación para logs asociados a este plan (si aplica)
+}
+
+model GradeOffering {
+  id           Int         @id @default(autoincrement())
+  studyPlanId  Int
+  grade        String      // puede ser "9" o "Grade 9", según convenga
+  groupName    String?     // opcional, para diferenciar grupos dentro de un mismo grado
+  finalReport  String      // descripción de la competencia a lograr
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+
+  studyPlan    StudyPlan   @relation(fields: [studyPlanId], references: [id])
+  trimesters   Trimester[]
+}
+
+model Trimester {
+  id              Int             @id @default(autoincrement())
+  gradeOfferingId Int
+  trimesterNumber Int             // 1, 2 o 3
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+
+  gradeOffering   GradeOffering   @relation(fields: [gradeOfferingId], references: [id])
+  rows            TrimesterRow[]
+}
+
+model TrimesterRow {
+  id                Int         @id @default(autoincrement())
+  trimesterId       Int
+  benchmark         String
+  learningEvidence  String      // se puede cambiar a Json si se requiere estructurar la información
+  thematicsComponents String
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
+
+  trimester         Trimester   @relation(fields: [trimesterId], references: [id])
+}
+
+// ===================================================
+// Tabla para Usuarios
+// ===================================================
+
+model User {
+  id             Int         @id @default(autoincrement())
+  nombre         String
+  username       String      @unique
+  rol            String      // podrías usar un enum si cuentas con roles predefinidos
+  password       String      // campo para la contraseña (asegúrate de almacenar solo hashes)
+  correo         String      @unique
+  estado         Boolean     // true = activo, false = inactivo
+  bloqueado      Boolean     // true = bloqueado, false = no bloqueado
+  ultimoIngreso  DateTime?   // opcional, registra el último ingreso
+
+  activityLogs   ActivityLog[]
+}
+
+// ===================================================
+// Tabla para Logs de Actividad
+// ===================================================
+
+model ActivityLog {
+  id           Int         @id @default(autoincrement())
+  userId       Int
+  studyPlanId  Int?        // opcional, en caso de que la actividad esté asociada a un plan específico
+  action       LogAction   // acción realizada: VISUALIZO, EDITO, ELIMINO
+  timestamp    DateTime    @default(now())
+  details      String?     // campo opcional para incluir más detalles sobre la acción
+
+  user         User        @relation(fields: [userId], references: [id])
+  studyPlan    StudyPlan?  @relation(fields: [studyPlanId], references: [id])
+}
+
+enum LogAction {
+  VISUALIZO
+  EDITO
+  ELIMINO
+}
