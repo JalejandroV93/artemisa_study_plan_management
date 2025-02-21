@@ -3,7 +3,7 @@
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { BookOpen, GraduationCap, Home, LayoutDashboard, Printer } from "lucide-react";
+import { BookOpen, GraduationCap, Home, Printer } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 

@@ -9,104 +9,166 @@ datasource db {
 }
 
 
+model User {
+  id           String    @id @default(uuid())
+  username     String    @unique // Nombre recibido de Phidias
+  document     String    @unique // Email o documento del JWT
+  fullName     String    // Nombre completo
+  role         Role      // ADMIN o TEACHER
+  password     String    // Derivado del documento del JWT
+  lastLogin    DateTime? // Última fecha de inicio de sesión
+  isBlocked    Boolean   @default(false) // Para bloquear usuarios
+
+  activityLogs ActivityLog[]
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  @@index([document])
+  
+
+}
+
+enum Role {
+  ADMIN
+  TEACHER
+}
+
+model Section {
+  id        String    @id @default(uuid())
+  name      String    @unique
+  grades    Grade[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+
+model Grade {
+  id          String       @id @default(uuid())
+  name        String       // e.g., "Ninth", "Tenth"
+  sectionId   String
+  section     Section      @relation(fields: [sectionId], references: [id])
+  groups      Group[]
+  gradeOfferings GradeOffering[]
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  @@index([name])
+  @@index([sectionId])
+}
+
+
+model Group {
+  id          String       @id @default(uuid())
+  name        String?      // Opcional, e.g., "A", "B"
+  gradeId     String      
+  grade       Grade        @relation(fields: [gradeId], references: [id])
+  enrollments Enrollment[]
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  @@index([gradeId])
+}
+
+
 model Subject {
-  id         Int          @id @default(autoincrement())
-  name       String
-  createdAt  DateTime     @default(now())
-  updatedAt  DateTime     @updatedAt
-
-  studyPlan  StudyPlan?
-}
-
-model StudyPlan {
-  id                  Int               @id @default(autoincrement())
-  subjectId           Int               @unique
-  vision              String?           // opcional
-  mission             String?           // opcional
-  generalObjective    String?           // opcional
-  specificObjectives  String?           // puede ser JSON (o String) según el requerimiento
-  didactics           String?           // opcional
-  crossCuttingProjects String?          // opcional
-  createdAt           DateTime          @default(now())
-  updatedAt           DateTime          @updatedAt
-
-  subject             Subject           @relation(fields: [subjectId], references: [id])
+  id                  String       @id @default(uuid())
+  name                String      
+  vision              String?
+  mission             String?
+  generalObjective    String?
+  specificObjectives  String[]
+  didactics           String?
+  crossCuttingProjects Project[]    @relation("SubjectProjects")
   gradeOfferings      GradeOffering[]
-  activityLogs        ActivityLog[]     // Relación para logs asociados a este plan (si aplica)
+  isActive            Boolean      @default(true) // Estado para activar/desactivar
+  createdAt           DateTime     @default(now())
+  updatedAt           DateTime     @updatedAt
+
+  @@index([name])
 }
+
+
+model Project {
+  id          String     @id @default(uuid())
+  name        String    
+  description String?
+  subjects    Subject[]  @relation("SubjectProjects")
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  @@index([name])
+}
+
 
 model GradeOffering {
-  id           Int         @id @default(autoincrement())
-  studyPlanId  Int
-  grade        String      // puede ser "9" o "Grade 9", según convenga
-  groupName    String?     // opcional, para diferenciar grupos dentro de un mismo grado
-  finalReport  String      // descripción de la competencia a lograr
-  createdAt    DateTime    @default(now())
-  updatedAt    DateTime    @updatedAt
+  id            String       @id @default(uuid())
+  subjectId     String      
+  subject       Subject      @relation(fields: [subjectId], references: [id])
+  gradeId       String      
+  grade         Grade        @relation(fields: [gradeId], references: [id])
+  finalReport   String       // Competencia a alcanzar al finalizar
+  trimesters    Trimester[]
+  enrollments   Enrollment[]
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
 
-  studyPlan    StudyPlan   @relation(fields: [studyPlanId], references: [id])
-  trimesters   Trimester[]
+
+  @@index([subjectId])
+  @@index([gradeId])
 }
+
+
+model Enrollment {
+  id              String       @id @default(uuid())
+  groupId         String      
+  group           Group        @relation(fields: [groupId], references: [id])
+  gradeOfferingId String      
+  gradeOffering   GradeOffering @relation(fields: [gradeOfferingId], references: [id])
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+
+  @@index([groupId])
+  @@index([gradeOfferingId])
+}
+
 
 model Trimester {
-  id              Int             @id @default(autoincrement())
-  gradeOfferingId Int
-  trimesterNumber Int             // 1, 2 o 3
-  createdAt       DateTime        @default(now())
-  updatedAt       DateTime        @updatedAt
+  id            String       @id @default(uuid())
+  gradeOfferingId String    
+  gradeOffering GradeOffering @relation(fields: [gradeOfferingId], references: [id])
+  number        Int          // 1, 2, 3
+  benchmarks    Benchmark[]
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
 
-  gradeOffering   GradeOffering   @relation(fields: [gradeOfferingId], references: [id])
-  rows            TrimesterRow[]
+  @@index([gradeOfferingId])
 }
 
-model TrimesterRow {
-  id                Int         @id @default(autoincrement())
-  trimesterId       Int
-  benchmark         String
-  learningEvidence  String      // se puede cambiar a Json si se requiere estructurar la información
-  thematicsComponents String
-  createdAt         DateTime    @default(now())
-  updatedAt         DateTime    @updatedAt
 
-  trimester         Trimester   @relation(fields: [trimesterId], references: [id])
+model Benchmark {
+  id                String       @id @default(uuid())
+  trimesterId       String      
+  trimester         Trimester    @relation(fields: [trimesterId], references: [id])
+  description       String       // Descripción de la competencia
+  learningEvidence  String[]     // Evidencias de aprendizaje
+  thematicComponents String[]    // Componentes temáticos
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
+
+  @@index([trimesterId])
 }
 
-// ===================================================
-// Tabla para Usuarios
-// ===================================================
-
-model User {
-  id             Int         @id @default(autoincrement())
-  nombre         String
-  username       String      @unique
-  rol            String      // podrías usar un enum si cuentas con roles predefinidos
-  password       String      // campo para la contraseña (asegúrate de almacenar solo hashes)
-  correo         String      @unique
-  estado         Boolean     // true = activo, false = inactivo
-  bloqueado      Boolean     // true = bloqueado, false = no bloqueado
-  ultimoIngreso  DateTime?   // opcional, registra el último ingreso
-
-  activityLogs   ActivityLog[]
-}
-
-// ===================================================
-// Tabla para Logs de Actividad
-// ===================================================
 
 model ActivityLog {
-  id           Int         @id @default(autoincrement())
-  userId       Int
-  studyPlanId  Int?        // opcional, en caso de que la actividad esté asociada a un plan específico
-  action       LogAction   // acción realizada: VISUALIZO, EDITO, ELIMINO
-  timestamp    DateTime    @default(now())
-  details      String?     // campo opcional para incluir más detalles sobre la acción
+  id          String    @id @default(uuid())
+  userId      String
+  user        User      @relation(fields: [userId], references: [id])
+  action      String    // e.g., "VIEW", "CREATE", "UPDATE", "DELETE"
+  entity      String    // e.g., "Subject", "Benchmark"
+  entityId    String    // ID del registro afectado
+  details     Json?     // Detalles adicionales, como datos antes y después de la edición
+  timestamp   DateTime  @default(now())
 
-  user         User        @relation(fields: [userId], references: [id])
-  studyPlan    StudyPlan?  @relation(fields: [studyPlanId], references: [id])
-}
-
-enum LogAction {
-  VISUALIZO
-  EDITO
-  ELIMINO
+  @@index([userId])
+  @@index([entity, entityId])
 }
