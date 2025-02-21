@@ -146,7 +146,7 @@ const router = useRouter()
                   </Button>
                 </TooltipTrigger>
                 {isOpen === false && (
-                  <TooltipContent side="right">Sign out</TooltipContent>
+                  <TooltipContent side="right">Cerrar Sesión</TooltipContent>
                 )}
               </Tooltip>
             </TooltipProvider>

@@ -64,36 +64,6 @@ export function Sidebar({menuList}:SidebarProps) {
             </Link>
         </Button>
         <Menu isOpen={getOpenState()} menuList={menuList} />
-        {/* <div className="w-full grow flex items-end">
-         <TooltipProvider disableHoverableContent>
-              <Tooltip delayDuration={100}>
-                <TooltipTrigger asChild>
-                  <Button
-                    onClick={async () => {
-                        await logout();
-                        router.refresh();
-                    }}
-                    variant="outline"
-                    className="w-full h-10 mt-5 hover:bg-red-800 hover:text-white"
-                  >
-                    <span className={cn(isOpen === false ? "" : "mr-4")}>
-                      <LogOut size={18} />
-                    </span>
-                    <p
-                      className={cn(
-                        "whitespace-nowrap",
-                        isOpen === false ? "opacity-0 hidden" : "opacity-100"
-                      )}
-                    >
-                      Salir
-                    </p>
-                  </Button>
-                </TooltipTrigger>
-                {isOpen === false && (
-                  <TooltipContent side="right">Salir</TooltipContent>
-                )}
-              </Tooltip>
-            </TooltipProvider></div> */}
       </div>
     </aside>
   );
