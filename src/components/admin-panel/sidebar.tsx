@@ -38,13 +38,13 @@ export function Sidebar() {
             <PanelsTopLeft className="w-6 h-6 mr-1" />
             <h1
               className={cn(
-                "font-bold text-lg whitespace-nowrap transition-[transform,opacity,display] ease-in-out duration-300",
+                "font-bold text-lg text-zinc-900 dark:text-white whitespace-nowrap transition-[transform,opacity,display] ease-in-out duration-300",
                 !getOpenState()
                   ? "-translate-x-96 opacity-0 hidden"
                   : "translate-x-0 opacity-100"
               )}
             >
-              Brand
+              Artemisa
             </h1>
           </Link>
         </Button>

@@ -1,5 +1,4 @@
 // 5. components/auth/AnimatedLogo.tsx - Componente para el logo animado
-"use client"
 
 import { motion } from "framer-motion"
 import { APPLogo } from "@/components/ui/app_logo"

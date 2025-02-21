@@ -14,11 +14,12 @@ model User {
   username     String    @unique // Nombre recibido de Phidias
   document     String    @unique // Email o documento del JWT
   fullName     String    // Nombre completo
+  email        String?   // Email 
   role         Role      // ADMIN o TEACHER
   password     String    // Derivado del documento del JWT
   lastLogin    DateTime? // Última fecha de inicio de sesión
   isBlocked    Boolean   @default(false) // Para bloquear usuarios
-
+  failedLoginAttempts Int @default(0) // Intentos fallidos de inicio de sesión
   activityLogs ActivityLog[]
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt

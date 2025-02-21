@@ -125,13 +125,14 @@ La aplicación estará disponible en `http://localhost:3000`.
 
 ```bash
 ├── components/       # Componentes reutilizables de React
-├── pages/            # Páginas de Next.js (rutas)
-│   ├── api/          # Endpoints de la API
-│   └── ...           # Otras páginas
+├── src/
+│   ├── app            # Páginas de Next.js (rutas)
+│   │   ├── api/          # Endpoints de la API
+│   │   └── ...           # Otras páginas
+│   ├── styles/           # Estilos globales y configuración de Tailwind
+│   ├── utils/            # Utilidades y funciones auxiliares
 ├── prisma/           # Esquema y migraciones de Prisma
 ├── public/           # Archivos estáticos (imágenes, etc.)
-├── styles/           # Estilos globales y configuración de Tailwind
-├── utils/            # Utilidades y funciones auxiliares
 └── ...               # Archivos de configuración (e.g., next.config.js)
 ```
 
