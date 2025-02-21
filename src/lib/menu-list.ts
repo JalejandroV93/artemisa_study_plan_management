@@ -45,7 +45,7 @@ export function getMenuList(pathname: string, user: UserPayload | null): Group[]
           href: "/v1/",
           label: "Inicio",
           icon: LayoutGrid,
-          roles: ['ADMIN', 'COLABORADOR'],
+          roles: ['ADMIN', 'TEACHER'],
         }
       ]
     },
@@ -56,25 +56,25 @@ export function getMenuList(pathname: string, user: UserPayload | null): Group[]
           href: "/v1/reports/maintenance",
           label: "Mantenimiento Equipos",
           icon: ClipboardCheck,
-          roles: ['ADMIN', 'COLABORADOR'],
+          roles: ['ADMIN', 'TEACHER'],
         },
         {
           href: "/v1/reports/network",
           label: "Red",
           icon: Network,
-          roles: ['ADMIN', 'COLABORADOR'],
+          roles: ['ADMIN', 'TEACHER'],
         },
         {
           href: "/v1/reports/mobile-classrooms",
           label: "Aulas Móviles",
           icon: Tablet,
-          roles: ['ADMIN', 'COLABORADOR'],
+          roles: ['ADMIN', 'TEACHER'],
         },
         {
           href: "/v1/reports/support",   
           label: "Soporte",    
           icon: HeartHandshake,    
-          roles: ['ADMIN', 'COLABORADOR'],   
+          roles: ['ADMIN', 'TEACHER'],   
           },
       ]
     }
