@@ -30,7 +30,7 @@ export function LoginForm() {
       router.push("/v1/")
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
-      console.error("Error en el inicio de sesión:", error)
+      //console.error("Error en el inicio de sesión:", error)
       toast.error(`Error de autenticación: ${error.message}`)
     } finally {
       setIsLoading(false)

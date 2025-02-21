@@ -1,15 +1,16 @@
+// components/admin-panel/user-nav.tsx
 "use client";
 
 import Link from "next/link";
-import { LayoutGrid, LogOut, User } from "lucide-react";
+import { LogOut, Settings } from "lucide-react"; // Importa Settings
 
 import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
-  TooltipProvider
+  TooltipProvider,
 } from "@/components/ui/tooltip";
 import {
   DropdownMenu,
@@ -18,10 +19,28 @@ import {
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
-  DropdownMenuTrigger
+  DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-
+import { useAuth } from "@/components/providers/AuthProvider"; // Importa useAuth
+import { useRouter } from "next/navigation";
+import { Skeleton } from "@/components/ui/skeleton";
 export function UserNav() {
+  const { user, isLoading } = useAuth(); // Obtiene el usuario y el estado de carga
+  const router = useRouter();
+  const logout = async () => {
+    await fetch("/api/auth/logout", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({}),
+    });
+  };
+
+  if (isLoading) {
+    return <Skeleton className="w-8 h-8 rounded-full" />; // O un spinner más elaborado
+  }
+
   return (
     <DropdownMenu>
       <TooltipProvider disableHoverableContent>
@@ -33,44 +52,50 @@ export function UserNav() {
                 className="relative h-8 w-8 rounded-full"
               >
                 <Avatar className="h-8 w-8">
-                  <AvatarImage src="#" alt="Avatar" />
-                  <AvatarFallback className="bg-transparent">JD</AvatarFallback>
+                
+                  <AvatarFallback className="bg-transparent">
+                    {user?.username
+                      ? user.username.slice(0, 2).toUpperCase()
+                      : "NN"}
+                  </AvatarFallback>
                 </Avatar>
               </Button>
             </DropdownMenuTrigger>
           </TooltipTrigger>
-          <TooltipContent side="bottom">Profile</TooltipContent>
+          <TooltipContent side="bottom">Perfil</TooltipContent>
         </Tooltip>
       </TooltipProvider>
 
       <DropdownMenuContent className="w-56" align="end" forceMount>
         <DropdownMenuLabel className="font-normal">
           <div className="flex flex-col space-y-1">
-            <p className="text-sm font-medium leading-none">John Doe</p>
+            {/* Muestra el nombre y correo del usuario */}
+            <p className="text-sm font-medium leading-none">{user?.fullName}</p>
             <p className="text-xs leading-none text-muted-foreground">
-              johndoe@example.com
+              {user?.email}
             </p>
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
+          {/* Enlace a la página de cuenta del usuario */}
           <DropdownMenuItem className="hover:cursor-pointer" asChild>
-            <Link href="/dashboard" className="flex items-center">
-              <LayoutGrid className="w-4 h-4 mr-3 text-muted-foreground" />
-              Dashboard
-            </Link>
-          </DropdownMenuItem>
-          <DropdownMenuItem className="hover:cursor-pointer" asChild>
-            <Link href="/account" className="flex items-center">
-              <User className="w-4 h-4 mr-3 text-muted-foreground" />
-              Account
+            <Link href="/v1/account/" className="flex items-center">
+              <Settings className="w-4 h-4 mr-3 text-muted-foreground" />
+              Ajustes de cuenta
             </Link>
           </DropdownMenuItem>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
-        <DropdownMenuItem className="hover:cursor-pointer" onClick={() => {}}>
+        <DropdownMenuItem
+          className="hover:cursor-pointer"
+          onClick={async () => {
+            await logout();
+            router.refresh();
+          }}
+        >
           <LogOut className="w-4 h-4 mr-3 text-muted-foreground" />
-          Sign out
+          Salir
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
