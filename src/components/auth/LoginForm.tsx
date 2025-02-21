@@ -46,7 +46,7 @@ export function LoginForm() {
     <form onSubmit={handleSubmit}>
       <CardContent>
         <div className="grid gap-4">
-          <div className="grid gap-2">
+          <div className="grid gap-2 ">
             <Label htmlFor="username">Usuario</Label>
             <Input
               id="username"
@@ -58,7 +58,7 @@ export function LoginForm() {
               onChange={(e) => setUsername(e.target.value)}
             />
           </div>
-          <div className="grid gap-2">
+          <div className="grid gap-2 ">
             <Label htmlFor="password">Contraseña</Label>
             <div className="relative">
               <Input
