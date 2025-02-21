@@ -1,22 +1,23 @@
-// lib/menu-list.ts
+// src/lib/menu-list.ts
 import {
   Users,
-  
   LayoutGrid,
   LucideIcon,
-  ClipboardCheck,
-  Network,
-  Tablet,
-  HeartHandshake,
+  BookOpen,
   Settings,
+  Users2,  // Icon for Groups
+  Book, //Icon for Subjects
+  CalendarDays, //Icon for Trimesters
+  BrainCircuit, //Icon for Picasso Promp
 } from "lucide-react";
-import { UserPayload } from "@/types/user"; // Importa el tipo UserPayload
+
+import { UserPayload } from "@/types/user";
 
 
 type Submenu = {
   href: string;
   label: string;
-  roles?: Array<UserPayload['rol']>;  // Opcional: Roles permitidos
+  roles?: Array<UserPayload['role']>;  // Now correctly references the 'role' property
   icon?: LucideIcon;
 };
 
@@ -24,19 +25,19 @@ type Menu = {
   href: string;
   label: string;
   icon: LucideIcon;
-  active?: boolean;
-  roles?: Array<UserPayload['rol']>; // Opcional: Roles permitidos
+  active?: boolean; // Consider removing 'active' if you're using pathname
+  roles?: Array<UserPayload['role']>; // Correctly references the 'role' property
   submenus?: Submenu[];
 };
 
-type Group = {
+export type Group = {  // Export the Group type
   groupLabel: string;
   menus: Menu[];
 };
 
 
 
-export function getMenuList(pathname: string, user: UserPayload | null): Group[] {  //Recibe user
+export function getMenuList(pathname: string, user: UserPayload | null): Group[] {
   const baseMenu: Group[] = [
     {
       groupLabel: "",
@@ -45,81 +46,74 @@ export function getMenuList(pathname: string, user: UserPayload | null): Group[]
           href: "/v1/",
           label: "Inicio",
           icon: LayoutGrid,
-          roles: ['ADMIN', 'TEACHER'],
-        }
-      ]
+          roles: ['ADMIN'],
+        },
+      ],
     },
     {
-      groupLabel: "Reportes",
+      groupLabel: "Gestión de Estudios",
       menus: [
         {
-          href: "/v1/reports/maintenance",
-          label: "Mantenimiento Equipos",
-          icon: ClipboardCheck,
+          href: "/v1/subjects",
+          label: "Planes de Estudio",
+          icon: BookOpen,
           roles: ['ADMIN', 'TEACHER'],
         },
+      ],
+    },
+    {
+      groupLabel: "Configuraciones",
+      menus: [
         {
-          href: "/v1/reports/network",
-          label: "Red",
-          icon: Network,
-          roles: ['ADMIN', 'TEACHER'],
+          href: "#", // Parent menu, no direct link
+          label: "Configuración",
+          icon: Settings,
+          roles: ['ADMIN'],
+          submenus: [
+            {
+              href: "/v1/settings/users",
+              label: "Administrar Usuarios",
+              icon: Users,
+              roles: ['ADMIN'],
+            },
+            {
+              href: "/v1/settings/groups",
+              label: "Administrar Grupos",
+              icon: Users2,
+              roles: ['ADMIN'],
+            },
+            {
+              href: "/v1/settings/subjects",
+              label: "Administrar Materias",
+              icon: Book,
+              roles: ['ADMIN'],
+            },
+            {
+              href: "/v1/settings/trimesters",
+              label: "Administrar Trimestres",
+              icon: CalendarDays,
+              roles: ['ADMIN'],
+            },
+            {
+                href: "/v1/settings/picasso-prompt",
+                label: "Configurar Prompt Picasso IA",
+                icon: BrainCircuit,
+                roles: ['ADMIN'],
+              },
+          ],
         },
-        {
-          href: "/v1/reports/mobile-classrooms",
-          label: "Aulas Móviles",
-          icon: Tablet,
-          roles: ['ADMIN', 'TEACHER'],
-        },
-        {
-          href: "/v1/reports/support",   
-          label: "Soporte",    
-          icon: HeartHandshake,    
-          roles: ['ADMIN', 'TEACHER'],   
-          },
-      ]
-    }
+      ],
+    },
   ];
 
-    // Menú de usuarios (solo para administradores)
-  const adminMenu: Menu = {
-    href: "/v1/users",
-    label: "Gestión de Usuarios",
-    icon: Users,
-    roles: ['ADMIN'], // Solo ADMIN
-  };
-
-  const settingsMenu: Menu = {
-    href: "#",  // Use '#' as a placeholder since it's a parent menu
-    label: "Configuración",
-    icon: Settings,
-    roles: ['ADMIN'],
-    submenus: [  // Add the submenus here
-        {
-            href: "/v1/settings/categories",
-            label: "Categorías de Soporte",
-        },
-        {
-            href: "/v1/settings/areas",
-            label: "Áreas de Soporte",
-        }
-        // Add other setting submenus here
-    ],
-};
-
-  // Agrega el menú de administrador si el usuario es ADMIN
-  if (user?.rol === 'ADMIN') {
-    baseMenu.push({ groupLabel: "Administración", menus: [adminMenu, settingsMenu] });
-  }
-  
-  
-  // Filtrar los menús y submenús según el rol del usuario
-  const filteredMenu = baseMenu.map(group => ({
-    ...group,
-    menus: group.menus.filter(menu => !menu.roles || (user && menu.roles.includes(user.rol))).map(menu => ({
-      ...menu,
-      submenus: menu.submenus?.filter(submenu => !submenu.roles || (user && submenu.roles.includes(user.rol)))
-    }))
-  }));
+    // Filtrar los menús y submenús según el rol del usuario
+    const filteredMenu = baseMenu.map(group => ({
+      ...group,
+      menus: group.menus.filter(menu => !menu.roles || (user && menu.roles.includes(user.role))).map(menu => ({
+        ...menu,
+        submenus: menu.submenus?.filter(submenu => !submenu.roles || (user && submenu.roles.includes(user.role)))
+      }))
+    }));
 
   return filteredMenu;
 }

@@ -7,6 +7,8 @@ export interface UserPayload extends JWTPayload {
   document: string;
   fullName: string;
   role: Role;
+  email?: string;    //Added
+  phonenumber?: string; //Added
   [key: string]: any; // Añade esta línea
 }
 

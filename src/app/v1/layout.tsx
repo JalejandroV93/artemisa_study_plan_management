@@ -1,9 +1,9 @@
-import AdminPanelLayout from "@/components/admin-panel/admin-panel-layout";
+import PanelLayout from "@/components/panel-layout/panel-layout";
 
 export default function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  return <AdminPanelLayout>{children}</AdminPanelLayout>;
+  return <PanelLayout>{children}</PanelLayout>;
 }

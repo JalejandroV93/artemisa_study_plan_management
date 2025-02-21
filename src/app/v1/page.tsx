@@ -3,7 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { PlusCircle } from "lucide-react";
 import Link from "next/link";
-import { ContentLayout } from "@/components/admin-panel/content-layout";
+import { ContentLayout } from "@/components/panel-layout/content-layout";
 
 export default function Home() {
   return (

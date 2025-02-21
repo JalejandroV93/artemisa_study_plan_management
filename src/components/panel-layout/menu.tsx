@@ -1,28 +1,42 @@
+// src/components/admin-panel/menu.tsx
 "use client";
 
 import Link from "next/link";
-import { Ellipsis, LogOut } from "lucide-react";
-import { usePathname } from "next/navigation";
+
 
 import { cn } from "@/lib/utils";
-import { getMenuList } from "@/lib/menu-list";
+import { Group } from "@/lib/menu-list";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { CollapseMenuButton } from "@/components/admin-panel/collapse-menu-button";
+import { CollapseMenuButton } from "@/components/panel-layout/collapse-menu-button";
 import {
   Tooltip,
   TooltipTrigger,
   TooltipContent,
   TooltipProvider
 } from "@/components/ui/tooltip";
+import { LogOut } from "lucide-react";
+import { useRouter } from "next/navigation";
+
 
 interface MenuProps {
   isOpen: boolean | undefined;
+  menuList: Group[];
 }
 
-export function Menu({ isOpen }: MenuProps) {
-  const pathname = usePathname();
-  const menuList = getMenuList(pathname);
+export function Menu({ isOpen, menuList}: MenuProps) {
+  
+const router = useRouter()
+  const logout = async () => {
+    await fetch("/api/auth/logout", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({}),
+    });
+  };
+ 
 
   return (
     <ScrollArea className="[&>div>div[style]]:!block">
@@ -39,7 +53,6 @@ export function Menu({ isOpen }: MenuProps) {
                   <Tooltip delayDuration={100}>
                     <TooltipTrigger className="w-full">
                       <div className="w-full flex justify-center items-center">
-                        <Ellipsis className="h-5 w-5" />
                       </div>
                     </TooltipTrigger>
                     <TooltipContent side="right">
@@ -59,8 +72,6 @@ export function Menu({ isOpen }: MenuProps) {
                           <TooltipTrigger asChild>
                             <Button
                               variant={
-                                (active === undefined &&
-                                  pathname.startsWith(href)) ||
                                 active
                                   ? "secondary"
                                   : "ghost"
@@ -100,11 +111,7 @@ export function Menu({ isOpen }: MenuProps) {
                       <CollapseMenuButton
                         icon={Icon}
                         label={label}
-                        active={
-                          active === undefined
-                            ? pathname.startsWith(href)
-                            : active
-                        }
+                        active={active ?? false}
                         submenus={submenus}
                         isOpen={isOpen}
                       />
@@ -118,7 +125,10 @@ export function Menu({ isOpen }: MenuProps) {
               <Tooltip delayDuration={100}>
                 <TooltipTrigger asChild>
                   <Button
-                    onClick={() => {}}
+                    onClick={async () => {
+                      await logout();
+                      router.refresh();
+                    }}
                     variant="outline"
                     className="w-full justify-center h-10 mt-5"
                   >
@@ -131,7 +141,7 @@ export function Menu({ isOpen }: MenuProps) {
                         isOpen === false ? "opacity-0 hidden" : "opacity-100"
                       )}
                     >
-                      Sign out
+                      Salir
                     </p>
                   </Button>
                 </TooltipTrigger>

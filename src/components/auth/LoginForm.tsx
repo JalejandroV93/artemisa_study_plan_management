@@ -27,7 +27,7 @@ export function LoginForm() {
     try {
       await loginClient(username, password)
       await refetchUser()
-      router.push("/v1/")
+      router.push("/v1/subjects")
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       //console.error("Error en el inicio de sesión:", error)

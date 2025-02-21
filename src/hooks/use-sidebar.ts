@@ -18,7 +18,7 @@ export const useSidebar = create(
   persist<SidebarStore>(
     (set, get) => ({
       isOpen: true,
-      isHover: false,
+      isHover: true,
       settings: { disabled: false, isHoverOpen: false },
       toggleOpen: () => {
         set({ isOpen: !get().isOpen });

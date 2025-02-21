@@ -1,6 +1,6 @@
 // app/v1/(dashboard)/users/page.tsx
 "use client";
-import { ContentLayout } from "@/components/admin-panel/content-layout";
+import { ContentLayout } from "@/components/panel-layout/content-layout";
 import { UserTable } from "@/components/users/UserTable";
 import { UserForm } from "@/components/users/UserForm";
 import { Button } from "@/components/ui/button";

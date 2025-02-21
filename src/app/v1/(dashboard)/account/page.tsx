@@ -1,7 +1,7 @@
 "use client";
 
 
-import { ContentLayout } from "@/components/admin-panel/content-layout";
+import { ContentLayout } from "@/components/panel-layout/content-layout";
 import { useAuth } from "@/components/providers/AuthProvider";
 import { ChangePasswordForm } from "@/components/account/ChangePasswordForm";
 import { ProfileForm } from "@/components/account/ProfileForm";
