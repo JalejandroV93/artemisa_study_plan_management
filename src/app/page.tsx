@@ -24,7 +24,7 @@ export default function LoginPage() {
         transition={{ type: "spring", stiffness: 300, damping: 30 }}
         className="w-full max-w-md rounded-xl shadow-md z-10"
       >
-        <Card>
+        <Card className="hover:border-red-800 transition-colors ease-in-out duration-300 hover:shadow-md hover:shadow-red-800">
           <LoginHeader />
           <LoginForm />
         </Card>

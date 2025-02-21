@@ -1,5 +1,4 @@
 // 3. components/auth/LoginHeader.tsx - Componente para el encabezado del login
-"use client"
 
 import { CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Logo } from "@/components/ui/logo"

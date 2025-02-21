@@ -1,12 +1,17 @@
-// src/types/user.ts
-import { JWTPayload } from 'jose';
-import {  Role } from '@prisma/client'; // Import Rol
-
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { Role } from '@prisma/client';
+import { type  JWTPayload } from 'jose';
 export interface UserPayload extends JWTPayload {
-  id: number;
+  id: string;
   username: string;
-  rol: Role;
-  nombre: string;
+  document: string;
+  fullName: string;
+  role: Role;
+  [key: string]: any; // Añade esta línea
+}
+
+export interface PhidiasPayload extends JWTPayload {
+  name: string;
   email: string;
-  phonenumber?: string | null;
+  [key: string]: any; // Añade esta línea
 }

@@ -1,11 +1,20 @@
 // 4. components/auth/LoginBackground.tsx - Componente para el fondo dividido
-"use client"
-
+import "@/assets/styles/auth/login-background.css"
 export function LoginBackground() {
   return (
-    <div className="absolute inset-0 z-0">
-      <div className="h-1/2 bg-[#e00d2d]" />
-      <div className="h-1/2" />
-    </div>
+    <div className="area">
+			<ul className="circles ">
+				<li></li>
+				<li></li>
+				<li></li>
+				<li></li>
+				<li></li>
+				<li></li>
+				<li></li>
+				<li></li>
+				<li></li>
+				<li></li>
+			</ul>
+		</div>
   )
 }

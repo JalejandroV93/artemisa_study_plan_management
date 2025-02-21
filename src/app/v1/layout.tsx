@@ -1,29 +1,9 @@
-import type { Metadata } from 'next';
-import { Inter } from 'next/font/google';
-import { Sidebar } from '@/components/sidebar';
-
-const inter = Inter({ subsets: ['latin'] });
-
-export const metadata: Metadata = {
-  title: 'Study Plan Management',
-  description: 'Manage and organize academic study plans',
-};
+import AdminPanelLayout from "@/components/admin-panel/admin-panel-layout";
 
 export default function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  return (
-    <html lang="en">
-      <body className={inter.className}>
-        <div className="flex h-screen">
-          <Sidebar />
-          <main className="flex-1 overflow-y-auto ml-2">
-            {children}
-          </main>
-        </div>
-      </body>
-    </html>
-  );
+  return <AdminPanelLayout>{children}</AdminPanelLayout>;
 }

@@ -3,10 +3,11 @@
 import { Button } from "@/components/ui/button";
 import { PlusCircle } from "lucide-react";
 import Link from "next/link";
+import { ContentLayout } from "@/components/admin-panel/content-layout";
 
 export default function Home() {
   return (
-    <div className="container mx-auto py-8 bg-gray-50">
+    <ContentLayout title="Dashboard -> En Desarrollo">
       <div className="flex items-center justify-between mb-8">
         <div>
           <h1 className="text-4xl font-bold text-gray-900">Study Plan Management</h1>
@@ -54,6 +55,6 @@ export default function Home() {
           <p className="text-gray-600 text-center py-4">No recent activity</p>
         </div>
       </div>
-    </div>
+      </ContentLayout>
   );
 }
