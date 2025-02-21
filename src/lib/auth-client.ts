@@ -1,7 +1,8 @@
-// lib/auth-client.ts
+// src/lib/auth-client.ts (Client-Side Authentication Logic)
+
 import { UserPayload } from "@/types/user";
 
-// Función de login para el cliente.  Hace la solicitud a la API.
+// Client-side login function.
 export const loginClient = async (username: string, password: string): Promise<void> => {
   const response = await fetch('/api/auth/login', {
     method: 'POST',
@@ -13,31 +14,36 @@ export const loginClient = async (username: string, password: string): Promise<v
     const errorData = await response.json();
     throw new Error(errorData.error || "Error de inicio de sesión");
   }
-  // No es necesario devolver nada.  La cookie se establece en el servidor.
+  // No need to return anything; the cookie is handled by the server.
 };
 
 
-// Función de logout para el cliente.  Hace la solicitud y redirige.
+// Client-side logout function.
 export const logoutClient = async (): Promise<void> => {
   const response = await fetch('/api/auth/logout', {
     method: 'POST',
   });
 
   if (response.ok) {
-    window.location.href = '/login'; // Redirige al cliente
-
+     window.location.href = "/"; //  redirect after logout.
   } else {
-    // Manejar errores, por ejemplo, mostrar un mensaje.
     console.error("Error al cerrar sesión");
   }
 };
 
-// Función para obtener el usuario desde el cliente.
+// Client-side function to fetch the current user.
 export const fetchUserClient = async (): Promise<UserPayload | null> => {
-    const response = await fetch('/api/auth/me');
-    if (response.ok) {
-        return await response.json();
-    } else {
-        return null; // No hay usuario autenticado
-    }
+  const response = await fetch('/api/auth/me');
+  if (response.ok) {
+    return await response.json();
+  } else {
+    return null; // No authenticated user.
+  }
+};
+
+
+// Client-side function to initiate SSO login by redirecting.
+export const initiateSSOLogin = () => {
+    // Directly redirect to the SSO endpoint on the server.
+    window.location.href = '/api/auth/sso'; // This will handle the query parameter
 };

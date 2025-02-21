@@ -5,7 +5,7 @@ import React, { useState } from "react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { useToast } from "@/hooks/use-toast"
+import { toast } from "sonner"
 import { Eye, EyeOff } from "lucide-react"
 import { CardContent, CardFooter } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
@@ -18,7 +18,6 @@ export function LoginForm() {
   const [isLoading, setIsLoading] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
   const router = useRouter()
-  const { toast } = useToast()
   const { refetchUser } = useAuth()
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -32,11 +31,7 @@ export function LoginForm() {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       console.error("Error en el inicio de sesión:", error)
-      toast({
-        variant: "destructive",
-        title: "Error de autenticación",
-        description: error.message,
-      })
+      toast.error(`Error de autenticación: ${error.message}`)
     } finally {
       setIsLoading(false)
     }
