@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 //src/app/api/auth/sso/route.ts
 
 import { handleSSOLogin } from "@/lib/auth";
@@ -7,7 +8,7 @@ import { cookies } from "next/headers";
 
 export async function POST(request: Request) {
   try {
-    // Extract the JWT token from the query parameters.
+    // Extract the JWT token from the request body
     const { jwt: jwtToken } = await request.json();
 
     if (!jwtToken) {
@@ -17,29 +18,47 @@ export async function POST(request: Request) {
       );
     }
 
-    // Handle SSO login/registration.
-    const userPayload = await handleSSOLogin(jwtToken);
+    try {
+      // Handle SSO login/registration
+      const userPayload = await handleSSOLogin(jwtToken);
+      
+      // Si llegamos aquí, la cuenta no está bloqueada
+      // Create a new token for our app
+      const token = await createToken(userPayload);
 
-    // Create a new token for our app (internal token).
-    const token = await createToken(userPayload);
+      // Set token in cookies
+      const cookieStore = await cookies();
+      cookieStore.set("auth_token", token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "strict",
+        maxAge: 60 * 60 * 24, // 24 hours
+        path: "/",
+      });
 
-    const cookieStore = await cookies();
-    cookieStore.set("auth_token", token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
-      maxAge: 60 * 60 * 24, // 24 hours
-      path: "/",
-    });
-
-    // Redirect the user to the dashboard (or wherever is appropriate).
-    const redirectURL = new URL("/v1", request.url); // Use the request URL to get the base origin
-    return NextResponse.redirect(redirectURL.toString());
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      return NextResponse.json({ success: true });
+      
+    } catch (e: any) {
+      // Específicamente cachear el error de cuenta bloqueada
+      if (e.message === "Cuenta bloqueada temporalmente") {
+        return NextResponse.json(
+          { error: "cuenta bloqueada" },
+          { status: 403 }
+        );
+      }
+      
+      // Otros errores de autenticación
+      return NextResponse.json(
+        { error: e.message || "Error en autenticación SSO" },
+        { status: 401 }
+      );
+    }
   } catch (error: any) {
-    console.error("SSO login error:", error);
-    //  return an error, perhaps redirect to a login failure page.
-    const errorRedirectURL = new URL("/login?sso_error=true", request.url);
-    return NextResponse.redirect(errorRedirectURL.toString());
+    console.error("SSO request processing error:", error);
+    
+    return NextResponse.json(
+      { error: "Error interno del servidor" },
+      { status: 500 }
+    );
   }
 }

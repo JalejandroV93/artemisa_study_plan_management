@@ -62,6 +62,36 @@ export function getMenuList(pathname: string, user: UserPayload | null): Group[]
       ],
     },
     {
+      groupLabel: "Administración",
+      menus: [
+        {
+          href: "/v1/settings/users",
+          label: "Administrar Usuarios",
+          icon: Users,
+          roles: ['ADMIN'],
+        },
+        {
+          href: "/v1/settings/groups",
+          label: "Administrar Grupos",
+          icon: Users2,
+          roles: ['ADMIN'],
+        },
+        {
+          href: "/v1/settings/subjects",
+          label: "Administrar Materias",
+          icon: Book,
+          roles: ['ADMIN'],
+        },
+        {
+          href: "/v1/settings/trimesters",
+          label: "Administrar Trimestres",
+          icon: CalendarDays,
+          roles: ['ADMIN'],
+        },
+
+      ],
+    },
+    {
       groupLabel: "Configuraciones",
       menus: [
         {
@@ -71,32 +101,8 @@ export function getMenuList(pathname: string, user: UserPayload | null): Group[]
           roles: ['ADMIN'],
           submenus: [
             {
-              href: "/v1/settings/users",
-              label: "Administrar Usuarios",
-              icon: Users,
-              roles: ['ADMIN'],
-            },
-            {
-              href: "/v1/settings/groups",
-              label: "Administrar Grupos",
-              icon: Users2,
-              roles: ['ADMIN'],
-            },
-            {
-              href: "/v1/settings/subjects",
-              label: "Administrar Materias",
-              icon: Book,
-              roles: ['ADMIN'],
-            },
-            {
-              href: "/v1/settings/trimesters",
-              label: "Administrar Trimestres",
-              icon: CalendarDays,
-              roles: ['ADMIN'],
-            },
-            {
                 href: "/v1/settings/picasso-prompt",
-                label: "Configurar Prompt Picasso IA",
+                label: "Prompt Picasso IA",
                 icon: BrainCircuit,
                 roles: ['ADMIN'],
               },

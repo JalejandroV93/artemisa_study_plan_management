@@ -24,8 +24,10 @@ model User {
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
 
+  @@index([username])
   @@index([document])
-  
+  @@index([role]) // Add index for role-based filtering
+  @@index([isBlocked]) // Add index for filtering blocked users
 
 }
 

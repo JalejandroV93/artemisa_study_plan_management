@@ -1,3 +1,4 @@
+// src/components/account/ChangePasswordForm.tsx
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import {
@@ -23,7 +24,7 @@ export const ChangePasswordForm = ({
   const [confirmNewPassword, setConfirmNewPassword] = useState("");
   const [isSaving, setIsSaving] = useState(false);
 
-  // Estados para alternar la visibilidad de cada input
+  // States to toggle visibility of each input
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -34,7 +35,7 @@ export const ChangePasswordForm = ({
     // Validaciones previas
     if (!currentPassword || !newPassword || !confirmNewPassword) {
       toast({
-        description: "Todos los campos de contraseña son obligatorios.",
+        description: "All password fields are required.",
         variant: "destructive",
       });
       return;
@@ -42,7 +43,7 @@ export const ChangePasswordForm = ({
 
     if (newPassword !== confirmNewPassword) {
       toast({
-        description: "Las contraseñas nuevas no coinciden.",
+        description: "New passwords do not match.",
         variant: "destructive",
       });
       return;
@@ -50,7 +51,7 @@ export const ChangePasswordForm = ({
 
     if (newPassword.length < 8) {
       toast({
-        description: "La nueva contraseña debe tener al menos 8 caracteres.",
+        description: "New password must be at least 8 characters long.",
         variant: "destructive",
       });
       return;
@@ -66,7 +67,7 @@ export const ChangePasswordForm = ({
 
       if (response.ok) {
         toast({
-          description: "Contraseña actualizada correctamente.",
+          description: "Password updated successfully.",
           variant: "default",
         });
         // Limpiar campos tras el éxito
@@ -77,15 +78,15 @@ export const ChangePasswordForm = ({
       } else {
         const errorData = await response.json();
         toast({
-          description: errorData.error || "Error al cambiar la contraseña.",
+          description: errorData.error || "Error changing password.",
           variant: "destructive",
         });
       }
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
-      console.error("Error al cambiar la contraseña:", error);
+      console.error("Error changing password:", error);
       toast({
-        description: error.message || "Error al cambiar la contraseña.",
+        description: error.message || "Error changing password.",
         variant: "destructive",
       });
     } finally {
@@ -96,19 +97,19 @@ export const ChangePasswordForm = ({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Cambiar Contraseña</CardTitle>
-        <CardDescription>Actualiza tu contraseña actual.</CardDescription>
+        <CardTitle>Change Password</CardTitle>
+        <CardDescription>Update your current password.</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
-        {/* Campo: Contraseña Actual */}
+        {/* Field: Current Password */}
         <div className="grid gap-2">
-          <Label htmlFor="current-password">Contraseña Actual</Label>
+          <Label htmlFor="current-password">Current Password</Label>
           <div className="relative">
             <Input
               id="current-password"
               name="current-password"
               type={showCurrentPassword ? "text" : "password"}
-              placeholder="Ingrese su contraseña actual"
+              placeholder="Enter your current password"
               required
               value={currentPassword}
               onChange={(e) => setCurrentPassword(e.target.value)}
@@ -127,22 +128,22 @@ export const ChangePasswordForm = ({
               )}
               <span className="sr-only">
                 {showCurrentPassword
-                  ? "Ocultar contraseña"
-                  : "Mostrar contraseña"}
+                  ? "Hide password"
+                  : "Show password"}
               </span>
             </Button>
           </div>
         </div>
 
-        {/* Campo: Nueva Contraseña */}
+        {/* Field: New Password */}
         <div className="grid gap-2">
-          <Label htmlFor="new-password">Nueva Contraseña</Label>
+          <Label htmlFor="new-password">New Password</Label>
           <div className="relative">
             <Input
               id="new-password"
               name="new-password"
               type={showNewPassword ? "text" : "password"}
-              placeholder="Ingrese su nueva contraseña"
+              placeholder="Enter your new password"
               required
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
@@ -160,23 +161,23 @@ export const ChangePasswordForm = ({
                 <Eye className="h-4 w-4 text-gray-500" />
               )}
               <span className="sr-only">
-                {showNewPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
+                {showNewPassword ? "Hide password" : "Show password"}
               </span>
             </Button>
           </div>
         </div>
 
-        {/* Campo: Confirmar Nueva Contraseña */}
+        {/* Field: Confirm New Password */}
         <div className="grid gap-2">
           <Label htmlFor="confirm-new-password">
-            Confirmar Nueva Contraseña
+            Confirm New Password
           </Label>
           <div className="relative">
             <Input
               id="confirm-new-password"
               name="confirm-new-password"
               type={showConfirmPassword ? "text" : "password"}
-              placeholder="Confirme su nueva contraseña"
+              placeholder="Confirm your new password"
               required
               value={confirmNewPassword}
               onChange={(e) => setConfirmNewPassword(e.target.value)}
@@ -194,23 +195,21 @@ export const ChangePasswordForm = ({
                 <Eye className="h-4 w-4 text-gray-500" />
               )}
               <span className="sr-only">
-                {showConfirmPassword
-                  ? "Ocultar contraseña"
-                  : "Mostrar contraseña"}
+                {showConfirmPassword ? "Hide password" : "Show password"}
               </span>
             </Button>
           </div>
         </div>
       </CardContent>
       <CardFooter>
-      <Button
+        <Button
           onClick={handlePasswordChange}
           disabled={
             isSaving ||
             (!currentPassword && !newPassword && !confirmNewPassword)
           }
         >
-          {isSaving ? "Guardando..." : "Cambiar Contraseña"}
+          {isSaving ? "Saving..." : "Change Password"}
         </Button>
       </CardFooter>
     </Card>
