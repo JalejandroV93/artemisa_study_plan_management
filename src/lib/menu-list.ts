@@ -94,18 +94,17 @@ export function getMenuList(pathname: string, user: UserPayload | null): Group[]
               label: "Grupos",
               icon: Users2,
               roles: ['ADMIN'],
+            },
+            {
+              href: "/v1/settings/academic-years",
+              label: "Años Académicos",
+              icon: Book,
+              roles: ['ADMIN'],
             }
 
         
           ],
-        },
-        {
-          href: "/v1/settings/subjects",
-          label: "Materias",
-          icon: Book,
-          roles: ['ADMIN'],
-        },
-
+        }
       ],
     },
     {

@@ -179,8 +179,22 @@ model ActivityLog {
 
 model AcademicCalendarSettings {
   id            String   @id @default(uuid())
-  numTrimesters Int      // Define el número de trimestres globalmente (ej: 3 o 4)
-  academicYear  String   // Ejemplo: "2024-2025"
+  academicYear  String   @unique  // e.g., "2023-2024", "2024", "2024-25" - make this unique
+  startDate     DateTime  //  Start date of the academic year.
+  endDate       DateTime  //  End date of the academic year.
+  trimesters    TrimesterSettings[] // Connect to a new model for individual trimesters.
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
+}
+
+model TrimesterSettings {
+  id                       String                   @id @default(uuid())
+  academicCalendarSettings AcademicCalendarSettings @relation(fields: [academicCalendarSettingsId], references: [id], onDelete: Cascade) // Cascade to ensure deletions cleanup nicely
+  academicCalendarSettingsId String
+  number                   Int      // 1, 2, 3 (or 4, if needed) - make this a number
+  startDate                DateTime
+  endDate                  DateTime
+
+  @@index([academicCalendarSettingsId, number])  // Composite index for efficient querying
+  @@unique([academicCalendarSettingsId, number])  // Enforce uniqueness per academic year
 }

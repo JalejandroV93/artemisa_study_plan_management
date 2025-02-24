@@ -481,30 +481,32 @@ export function DashboardSkeleton() {
 
 export const SkeletonRows = () => {
   return (
-    <>
-      {Array.from({ length: 5 }).map((_, index) => (
-        <TableRow key={index}>
-          <TableCell>
-            <div className="skeleton h-4 w-24 bg-gray-300 rounded" />
-          </TableCell>
-          <TableCell>
-            <div className="skeleton h-4 w-20 bg-gray-300 rounded" />
-          </TableCell>
-          <TableCell>
-            <div className="skeleton h-4 w-32 bg-gray-300 rounded" />
-          </TableCell>
-          <TableCell>
-            <div className="skeleton h-4 w-28 bg-gray-300 rounded" />
-          </TableCell>
-          <TableCell>
-            <div className="skeleton h-4 w-20 bg-gray-300 rounded" />
-          </TableCell>
-          <TableCell>
-            <div className="skeleton h-4 w-16 bg-gray-300 rounded" />
-          </TableCell>
-          <TableCell></TableCell>
-        </TableRow>
-      ))}
-    </>
+    <Table>
+      <TableBody>  {/* <--  Wrap in TableBody! */}
+        {Array.from({ length: 5 }).map((_, index) => (
+          <TableRow key={index}>
+            <TableCell>
+              <Skeleton className="h-4 w-24" />
+            </TableCell>
+            <TableCell>
+              <Skeleton className="h-4 w-20" />
+            </TableCell>
+            <TableCell>
+              <Skeleton className="h-4 w-32" />
+            </TableCell>
+            <TableCell>
+              <Skeleton className="h-4 w-28" />
+            </TableCell>
+            <TableCell>
+              <Skeleton className="h-4 w-20" />
+            </TableCell>
+            <TableCell>
+              <Skeleton className="h-4 w-16" />
+            </TableCell>
+            <TableCell></TableCell>
+          </TableRow>
+        ))}
+      </TableBody>
+    </Table>
   );
 };
