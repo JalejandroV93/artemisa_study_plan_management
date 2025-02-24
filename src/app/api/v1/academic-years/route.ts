@@ -17,11 +17,13 @@ const createAcademicYearSchema = z.object({
   ).min(1), // Must have at least one trimester
 });
 
+export const trimestersSchema = createAcademicYearSchema.pick({ trimesters: true });
+
 export async function GET() {
-  const user = await getCurrentUser();
-  if (!user || user.role !== 'ADMIN') {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
-  }
+ // const user = await getCurrentUser(); //Removed auth
+ // if (!user || user.role !== 'ADMIN') {
+  //  return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
+  //}
 
   try {
     const academicYears = await prisma.academicCalendarSettings.findMany({

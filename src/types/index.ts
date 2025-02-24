@@ -6,8 +6,11 @@ export interface Subject {
   generalObjective?: string;
   specificObjectives?: string[];
   didactics?: string;
-  crossCuttingProjects?: string;
+  crossCuttingProjects: Project[]; // Add this line
   gradeOfferings: GradeOffering[];
+  isActive: boolean;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 export interface GradeOffering {
@@ -36,4 +39,24 @@ export interface Benchmark {
     aestheticAppreciation?: string;
   };
   thematicsComponents: string[];
+}
+export interface Grade { 
+  id: string;
+  name: string;
+  colombianGrade: number | null;
+  sectionId: string;
+}
+export interface Group { 
+  id: string;
+  name: string | null;
+  gradeId: string;
+}
+
+export interface Project {
+  id: string;
+  name: string;
+  description?: string | null;
+  subjects?: Subject[]; // Add this to show the relation
+  createdAt: Date;
+  updatedAt: Date;
 }

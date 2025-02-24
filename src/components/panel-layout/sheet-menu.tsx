@@ -1,3 +1,6 @@
+// src/components/panel-layout/sheet-menu.tsx
+"use client";
+
 import Link from "next/link";
 import { MenuIcon } from "lucide-react";
 
@@ -11,7 +14,22 @@ import {
 } from "@/components/ui/sheet";
 import { APPLogo } from "@/components/ui/app_logo";
 
+// ADD THESE:
+import { useAuth } from "@/components/providers/AuthProvider"; // Import
+import { getMenuList } from "@/lib/menu-list";  // Import
+import { usePathname } from "next/navigation";
+
+
 export function SheetMenu() {
+
+    // Add this: Get user and menuList.  This is *identical* to PanelLayout.
+    const { user } = useAuth();
+    const pathname = usePathname();
+    const menuList = getMenuList(pathname, user);
+
+    // Add this console log
+    console.log("SheetMenu - menuList:", menuList);
+
   return (
     <Sheet>
       <SheetTrigger className="lg:hidden" asChild>
@@ -31,7 +49,8 @@ export function SheetMenu() {
             </Link>
           </Button>
         </SheetHeader>
-        <Menu isOpen menuList={[]} />
+        {/* Pass menuList here! */}
+        <Menu isOpen menuList={menuList} />
       </SheetContent>
     </Sheet>
   );

@@ -13,7 +13,7 @@ export default function Home() {
           <h1 className="text-4xl font-bold text-gray-900">Study Plan Management</h1>
           <p className="text-gray-600 mt-2">Manage and organize your academic study plans</p>
         </div>
-        <Link href="/subjects/new">
+        <Link href="/v1/subjects/new">
           <Button className="flex items-center gap-2">
             <PlusCircle className="w-4 h-4" />
             New Subject
@@ -26,28 +26,12 @@ export default function Home() {
         <div className="bg-white rounded-lg shadow-md p-6 border border-gray-200">
           <h3 className="text-lg font-semibold mb-2">Subjects</h3>
           <p className="text-gray-600 mb-4">Create and manage subject study plans</p>
-          <Link href="/subjects">
+          <Link href="/v1/subjects">
             <Button variant="secondary" className="w-full">View Subjects</Button>
           </Link>
-        </div>
+        </div></div>
         
-        <div className="bg-white rounded-lg shadow-md p-6 border border-gray-200">
-          <h3 className="text-lg font-semibold mb-2">Grade Offerings</h3>
-          <p className="text-gray-600 mb-4">Manage grade-specific content</p>
-          <Link href="/grades">
-            <Button variant="secondary" className="w-full">View Grades</Button>
-          </Link>
-        </div>
-        
-        <div className="bg-white rounded-lg shadow-md p-6 border border-gray-200">
-          <h3 className="text-lg font-semibold mb-2">Print Study Plans</h3>
-          <p className="text-gray-600 mb-4">Generate printable study plan reports</p>
-          <Link href="/print">
-            <Button variant="secondary" className="w-full">Print Options</Button>
-          </Link>
-        </div>
-      </div>
-
+       
       {/* Recent Activity */}
       <div className="bg-white rounded-lg shadow-md p-6 border border-gray-200">
         <h2 className="text-xl font-semibold mb-4">Recent Activity</h2>

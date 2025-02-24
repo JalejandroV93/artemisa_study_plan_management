@@ -11,7 +11,7 @@ const createSubjectSchema = z.object({
   generalObjective: z.string().optional(),
   specificObjectives: z.array(z.string()).optional(), // Array of strings
   didactics: z.string().optional(),
-  crossCuttingProjects: z.array(z.string()).optional(),  // Array of strings
+  crossCuttingProjects: z.array(z.string().uuid()).optional(),  // Array of *Project IDs* (UUIDs)
   isActive: z.boolean().optional(), // You might want a default in the schema itself.
 });
 
@@ -35,7 +35,8 @@ export async function GET(request: Request) {
           select: {
             gradeId: true,
           }
-        }
+        },
+        crossCuttingProjects: true // Include related projects
       },
       orderBy: { name: 'asc' }, // Consistent ordering.
     });
@@ -60,11 +61,20 @@ export async function POST(request: Request) {
 
     const newSubject = await prisma.subject.create({
       data: {
-        ...validatedData,
+        name: validatedData.name,
+        vision: validatedData.vision,
+        mission: validatedData.mission,
+        generalObjective: validatedData.generalObjective,
+        specificObjectives: validatedData.specificObjectives || [], //If there aren't specificObjectives, return an empty array
+        didactics: validatedData.didactics,
         isActive: validatedData.isActive ?? true,  // Default to true if not provided
-        specificObjectives: validatedData.specificObjectives || [], //If there aren't specificObjectives, return a empty array
-        crossCuttingProjects: validatedData.crossCuttingProjects || []
+        crossCuttingProjects: { // Connect existing projects by their IDs.
+          connect: validatedData.crossCuttingProjects?.map(id => ({ id })) || [],
+        },
       },
+      include: { // Include for return
+        crossCuttingProjects: true
+      }
     });
 
     return NextResponse.json(newSubject, { status: 201 });

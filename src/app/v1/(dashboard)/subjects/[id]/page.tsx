@@ -5,7 +5,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { ArrowLeft, Edit, Printer } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card } from "@/components/ui/card"; // Removed CardContent, CardHeader, CardTitle
 import { Logo } from "@/components/ui/logo";
 import { useParams, useRouter } from "next/navigation";
 import {
@@ -21,15 +21,16 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { useToast } from "@/hooks/use-toast";  // Import useToast
-import { Subject, GradeOffering, Trimester, Benchmark } from "@prisma/client"; // Import Prisma types
-import { SkeletonText, Skeleton } from "@/components/ui/skeleton"; // Import Skeleton
+import { useToast } from "@/hooks/use-toast";
+import { Subject, GradeOffering, Trimester, Benchmark, Project } from "@prisma/client"; // Import Project
+import { Skeleton } from "@/components/ui/skeleton"; // Import Skeleton
 import { useAuth } from "@/components/providers/AuthProvider";
 
 //Extends interfaces or types
 type ExtendedTrimester = Trimester & { benchmarks: Benchmark[] };
 type ExtendedGradeOffering = GradeOffering & { trimesters: ExtendedTrimester[]; grade: {name: string, id: string}; group:{name: string} };
-type ExtendedSubject = Subject & { gradeOfferings: ExtendedGradeOffering[] };
+//Crucially, add the crossCuttingProjects here:
+type ExtendedSubject = Subject & { gradeOfferings: ExtendedGradeOffering[], crossCuttingProjects: Project[] };
 
 
 export default function SubjectDetailPage() {
@@ -79,6 +80,7 @@ export default function SubjectDetailPage() {
     if (id) {
       fetchSubject();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [id, router]);
 
     // Filter grade offerings based on selected grade
@@ -224,7 +226,8 @@ list-outside text-gray-600 mb-4"
             <>
               <h3 className="font-medium mb-2">Cross-Cutting Projects</h3>
               <p className="text-gray-600">
-                {subject.crossCuttingProjects}
+                {/* Assuming crossCuttingProjects is an array of project names */}
+                {subject.crossCuttingProjects.map((project) => project.name).join(', ')}
               </p>
             </>
           )}

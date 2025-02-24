@@ -2,7 +2,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardFooter } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import {
   Select,
   SelectContent,
@@ -10,7 +10,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { PlusCircle, Eye, Edit, Trash2 } from "lucide-react";
+import { PlusCircle, Eye, Edit, Trash2, MoreHorizontal } from "lucide-react";
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
@@ -86,6 +86,7 @@ export default function SubjectsPage() {
   useEffect(() => {
     fetchSubjects(selectedGrade);
     fetchGrades(); // Fetch grades for the filter dropdown
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedGrade]);
 
   const handleDelete = async () => {

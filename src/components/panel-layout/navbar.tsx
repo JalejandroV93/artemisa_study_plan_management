@@ -14,7 +14,7 @@ export function Navbar() {
         <div className="flex items-center space-x-4 lg:space-x-0">
           <SheetMenu />
           {/* Search Input (Placeholder) */}
-          <div className="flex items-center w-full max-w-sm">
+          <div className="hidden items-center w-full max-w-sm">
             <Search className="mr-2 h-4 w-4 shrink-0 opacity-50" />
             <Input
               type="search"

@@ -43,6 +43,7 @@ export default function EditSubjectPage() {
         }
         const data:Subject = await res.json();
         setSubject(data);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } catch (error: any) {
         console.error("Error fetching subject:", error);
         toast({
@@ -60,6 +61,7 @@ export default function EditSubjectPage() {
     if (id) {
       fetchSubject();
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id, router]);
 
   const handleClose = () => {

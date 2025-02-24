@@ -11,7 +11,7 @@ const updateSubjectSchema = z.object({
   generalObjective: z.string().optional(),
   specificObjectives: z.array(z.string()).optional(), // Array of strings
   didactics: z.string().optional(),
-  crossCuttingProjects: z.array(z.string()).optional(), // Array of strings
+  crossCuttingProjects: z.array(z.string().uuid()).optional(), // Array of *Project IDs* for connecting/disconnecting
   isActive: z.boolean().optional(),
 });
 
@@ -21,7 +21,7 @@ export async function GET(request: Request, { params }: { params: { id: string }
     const subject = await prisma.subject.findUnique({
       where: { id: params.id },
       include: {
-        crossCuttingProjects: true,
+        crossCuttingProjects: true, // Simple include for related projects.
         gradeOfferings: {
           include: {
             trimesters: {
@@ -32,13 +32,9 @@ export async function GET(request: Request, { params }: { params: { id: string }
             grade: {
               select: {
                 name: true,
+                id: true
               }
             },
-            group: {
-                select:{
-                    name: true
-                }
-            }
           },
         },
       },
@@ -66,10 +62,27 @@ export async function PUT(request: Request, { params }: { params: { id: string }
     const body = await request.json();
     const validatedData = updateSubjectSchema.parse(body);
 
-    const updatedSubject = await prisma.subject.update({
-      where: { id: params.id },
-      data: validatedData,
-    });
+      const updatedSubject = await prisma.subject.update({
+          where: { id: params.id },
+          data: {
+              name: validatedData.name,
+              vision: validatedData.vision,
+              mission: validatedData.mission,
+              generalObjective: validatedData.generalObjective,
+              specificObjectives: validatedData.specificObjectives, //  Update string[]
+              didactics: validatedData.didactics,
+              isActive: validatedData.isActive,
+              ...(validatedData.crossCuttingProjects && { //Conditional Update for Many to Many
+                crossCuttingProjects: {
+                    set: validatedData.crossCuttingProjects.map(id => ({ id })), // set replaces all existing relations
+                  },
+              }),
+          },
+          include:{ // Include for return
+              crossCuttingProjects: true
+          }
+      });
+
 
     return NextResponse.json(updatedSubject);
   } catch (error) {
