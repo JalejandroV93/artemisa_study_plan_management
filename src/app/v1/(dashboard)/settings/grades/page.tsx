@@ -1,7 +1,7 @@
 // src/app/v1/(dashboard)/settings/grades/page.tsx
 "use client";
 import { ContentLayout } from "@/components/panel-layout/content-layout";
-import { GradeTable } from "@/components/grades/GradeTable";
+import {GradeTable} from "@/components/grades/GradeTable";
 import { GradeForm } from "@/components/grades/GradeForm";
 import { Button } from "@/components/ui/button";
 import { useState, useEffect } from "react";

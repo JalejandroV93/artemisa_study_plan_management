@@ -176,3 +176,11 @@ model ActivityLog {
   @@index([userId])
   @@index([entity, entityId])
 }
+
+model AcademicCalendarSettings {
+  id            String   @id @default(uuid())
+  numTrimesters Int      // Define el número de trimestres globalmente (ej: 3 o 4)
+  academicYear  String   // Ejemplo: "2024-2025"
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}

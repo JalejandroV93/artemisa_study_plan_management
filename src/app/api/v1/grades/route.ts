@@ -1,9 +1,10 @@
-
+// src/app/api/v1/grades/route.ts
 import { prisma } from '@/lib/prisma';
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { getCurrentUser } from '@/lib/auth';
 import { Grade } from '@/types/school_settings';
+
 const createGradeSchema = z.object({
   name: z.string().min(1).max(255),
   colombianGrade: z.number().int().min(1).max(11),
@@ -13,9 +14,9 @@ const createGradeSchema = z.object({
 // GET /api/v1/grades - Get all grades (with optional sectionId filter)
 export async function GET(request: Request) {
   const user = await getCurrentUser();
-    if (!user || user.role !== 'ADMIN') {
-        return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
-    }
+  if (!user || user.role !== 'ADMIN') {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
+  }
 
   const { searchParams } = new URL(request.url);
   const sectionId = searchParams.get('sectionId');
@@ -28,10 +29,10 @@ export async function GET(request: Request) {
       orderBy: {
         colombianGrade: 'asc', // Order by Colombian grade
       },
-        include:{
-            section: true,
-            groups: true
-        }
+      include: {
+        section: true,
+        groups: true
+      }
     });
     return NextResponse.json(grades as Grade[]); // Cast to your custom type
   } catch (error) {
@@ -42,30 +43,44 @@ export async function GET(request: Request) {
 
 // POST /api/v1/grades - Create a new grade
 export async function POST(request: Request) {
-    const user = await getCurrentUser();
-    if (!user || user.role !== 'ADMIN') {
-        return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
-    }
+  const user = await getCurrentUser();
+  if (!user || user.role !== 'ADMIN') {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
+  }
   try {
     const body = await request.json();
     const { name, colombianGrade, sectionId } = createGradeSchema.parse(body);
 
-    const newGrade = await prisma.grade.create({
-      data: {
-        name,
-        colombianGrade,
-        sectionId,
-      },
+    // Use a transaction to ensure atomicity (grade + groups created, or nothing)
+    const newGrade = await prisma.$transaction(async (tx) => {
+        const createdGrade = await tx.grade.create({
+            data: {
+                name,
+                colombianGrade,
+                sectionId,
+            },
+        });
+
+        // Automatically create groups "A" and "B"
+        await tx.group.createMany({
+            data: [
+                { name: "A", gradeId: createdGrade.id },
+                { name: "B", gradeId: createdGrade.id },
+            ],
+        });
+
+        return createdGrade; // Return the newly created grade
     });
+
 
     return NextResponse.json(newGrade, { status: 201 });
   } catch (error) {
     if (error instanceof z.ZodError) {
       return NextResponse.json({ error: error.format() }, { status: 400 });
     }
-      if (error && typeof error === 'object' && 'code' in error && error.code === 'P2002') {
-        return NextResponse.json({ error: 'Grade with that name already exists in the section.' }, { status: 409 });
-      }
+    if (error && typeof error === 'object' && 'code' in error && error.code === 'P2002') {
+      return NextResponse.json({ error: 'Grade with that name already exists in the section.' }, { status: 409 });
+    }
     return NextResponse.json({ error: 'Failed to create grade' }, { status: 500 });
   }
 }

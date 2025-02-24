@@ -19,34 +19,44 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Input } from "@/components/ui/input" // ADDED
 import { Group } from "@prisma/client";
 import { useToast } from "@/hooks/use-toast"
 
 const createGroupSchema = z.object({
-  name: z.enum(["A", "B"]), // Only A or B
+  name: z.string().min(1, "Group name is required").max(10, "Group name must be less than 10 characters"), // Added String Validation
   gradeId: z.string().uuid(),
 });
 
-type GroupFormValues = z.infer<typeof createGroupSchema>;
+const updateGroupSchema = z.object({ // Seperate schema for update
+    name: z.string().min(1, "Group name is required").max(10, "Group name must be less than 10 characters").optional(),
+    gradeId: z.string().uuid().optional(), // Keep gradeId
+})
+
+type CreateGroupFormValues = z.infer<typeof createGroupSchema>;
+type UpdateGroupFormValues = z.infer<typeof updateGroupSchema>
+
 
 interface GroupFormProps {
   group?: Group | null;
   onClose: () => void;
   onSuccess: () => void;
-  grades: {id: string, name: string, section:{name: string}}[]; //for the select dropdown
+  grades: { id: string, name: string, section: { name: string } }[]; //for the select dropdown
 }
 
 export function GroupForm({ group, onClose, onSuccess, grades }: GroupFormProps) {
-    const { toast } = useToast();
-  const form = useForm<GroupFormValues>({
-    resolver: zodResolver(createGroupSchema),
+  const { toast } = useToast();
+
+  // Important: Use correct form type based on create/update
+  const form = useForm<CreateGroupFormValues | UpdateGroupFormValues>({
+    resolver: zodResolver(group ? updateGroupSchema : createGroupSchema),  // Choose schema
     defaultValues: group
-      ? { name: group.name as "A" | "B", gradeId: group.gradeId }
-      : { name: "A", gradeId: "" }, // Default to "A"
+      ? { name: group.name ?? "", gradeId: group.gradeId }
+      : { name: "", gradeId: "" }, // Default to ""
   });
 
-  async function onSubmit(values: GroupFormValues) {
-     try {
+  async function onSubmit(values: CreateGroupFormValues | UpdateGroupFormValues) {
+    try {
       const response = await fetch(group ? `/api/v1/groups/${group.id}` : '/api/v1/groups', {
         method: group ? 'PUT' : 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -55,7 +65,15 @@ export function GroupForm({ group, onClose, onSuccess, grades }: GroupFormProps)
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || (group ? "Failed to update group" : "Failed to create group"));
+          if (response.status === 400 && errorData.error) {
+            form.setError("root", { message: "Error en los datos enviados."}) //Form Validation Errors
+            return;
+          }  else {
+            throw new Error(
+              errorData.error ||
+              (group ? "Failed to update group" : "Failed to create group")
+            );
+          }
       }
 
       onSuccess();
@@ -65,7 +83,7 @@ export function GroupForm({ group, onClose, onSuccess, grades }: GroupFormProps)
       });
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
-       toast({
+      toast({
         description: error.message,
         variant: "destructive"
       });
@@ -104,18 +122,10 @@ export function GroupForm({ group, onClose, onSuccess, grades }: GroupFormProps)
           name="name"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Group</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select a group" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  <SelectItem value="A">A</SelectItem>
-                  <SelectItem value="B">B</SelectItem>
-                </SelectContent>
-              </Select>
+              <FormLabel>Group Name</FormLabel>
+              <FormControl>
+                <Input placeholder="Enter group name (e.g., A, B, C)" {...field} /> {/* Use Input */}
+              </FormControl>
               <FormMessage />
             </FormItem>
           )}
