@@ -19,11 +19,11 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { useUserStore } from "@/lib/stores/userStore"; // Import Zustand store
+import { useUserStore } from "@/lib/stores/userStore";
 import { User } from "@prisma/client";
 import { useEffect, useState } from "react";
+import { useDebounce } from "use-debounce";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -32,11 +32,13 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { MoreHorizontal, Edit, Lock, Unlock, Trash2 } from "lucide-react";
-import { SkeletonTable } from "@/components/skeletons/SkeletonsUI";
-
+import { SkeletonRows } from "@/components/skeletons/SkeletonsUI";
 interface UserTableProps {
   onEdit: (user: User) => void;
 }
+
+// Componente auxiliar para renderizar filas esqueléticas
+
 
 export function UserTable({ onEdit }: UserTableProps) {
   const {
@@ -45,127 +47,207 @@ export function UserTable({ onEdit }: UserTableProps) {
     loading,
     deleteUser,
     blockUser,
-    unblockUser
+    unblockUser,
   } = useUserStore();
-  const [currentPage, ] = useState(1);
+  const [currentPage] = useState(1);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [debouncedSearchTerm] = useDebounce(searchTerm, 500);
+  const [sortColumn, setSortColumn] = useState("createdAt");
+  const [sortOrder, setSortOrder] = useState("desc");
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [userToDelete, setUserToDelete] = useState<string | null>(null);
 
-    useEffect(() => {
-        fetchUsers(currentPage);
-    }, [currentPage, fetchUsers]);
-    if(loading){
-        return <SkeletonTable />
+  useEffect(() => {
+    fetchUsers({
+      page: currentPage,
+      search: debouncedSearchTerm,
+      sortColumn,
+      sortOrder,
+    });
+  }, [currentPage, debouncedSearchTerm, sortColumn, sortOrder, fetchUsers]);
+
+  const handleSort = (column: string) => {
+    if (sortColumn === column) {
+      setSortOrder(sortOrder === "asc" ? "desc" : "asc");
+    } else {
+      setSortColumn(column);
+      setSortOrder("asc");
     }
-
+  };
 
   const handleDelete = async (id: string) => {
     try {
+      console.log("Deleting user with ID:", id);
       const response = await fetch(`/api/v1/users/${id}`, { method: 'DELETE' });
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || "Failed to delete user");
+        throw new Error(errorData.error || "Error al eliminar el usuario");
       }
       deleteUser(id);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       console.error("Error deleting user:", error);
-      // Display error to user (using toast or other notification)
+      // Aquí podrías mostrar una notificación al usuario
     }
   };
 
   const handleBlock = async (id: string, block: boolean) => {
-      try {
-          if(block){
-            await blockUser(id)
-          }else{
-            await unblockUser(id)
-          }
-
-      } catch (error) {
-        console.error("Error unblocking user:", error);
+    try {
+      if (block) {
+        await blockUser(id);
+      } else {
+        await unblockUser(id);
       }
-    };
+    } catch (error) {
+      console.error("Error unblocking user:", error);
+    }
+  };
 
   return (
-      <>
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Username</TableHead>
-              <TableHead>Full Name</TableHead>
-              <TableHead>Email</TableHead>
-              <TableHead>Role</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {users.map((user) => (
+    <>
+      <div className="mb-4">
+        <input
+          type="text"
+          placeholder="Buscar usuarios..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="border p-2 rounded"
+        />
+      </div>
+      <Table>
+        {/* Las columnas se mantienen estáticas */}
+        <TableHeader>
+          <TableRow>
+            <TableHead
+              onClick={() => handleSort("username")}
+              className="cursor-pointer"
+            >
+              Nombre de usuario{" "}
+              {sortColumn === "username" &&
+                (sortOrder === "asc" ? "↑" : "↓")}
+            </TableHead>
+            <TableHead
+              onClick={() => handleSort("document")}
+              className="cursor-pointer"
+            >
+              Documento{" "}
+              {sortColumn === "document" &&
+                (sortOrder === "asc" ? "↑" : "↓")}
+            </TableHead>
+            <TableHead
+              onClick={() => handleSort("fullName")}
+              className="cursor-pointer"
+            >
+              Nombre completo{" "}
+              {sortColumn === "fullName" &&
+                (sortOrder === "asc" ? "↑" : "↓")}
+            </TableHead>
+            <TableHead
+              onClick={() => handleSort("email")}
+              className="cursor-pointer"
+            >
+              Correo{" "}
+              {sortColumn === "email" && (sortOrder === "asc" ? "↑" : "↓")}
+            </TableHead>
+            <TableHead
+              onClick={() => handleSort("role")}
+              className="cursor-pointer"
+            >
+              Rol{" "}
+              {sortColumn === "role" && (sortOrder === "asc" ? "↑" : "↓")}
+            </TableHead>
+            <TableHead
+              onClick={() => handleSort("isBlocked")}
+              className="cursor-pointer"
+            >
+              Estado{" "}
+              {sortColumn === "isBlocked" &&
+                (sortOrder === "asc" ? "↑" : "↓")}
+            </TableHead>
+            <TableHead className="text-right">Acciones</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {loading ? (
+            <SkeletonRows />
+          ) : (
+            users.map((user) => (
               <TableRow key={user.id}>
                 <TableCell>{user.username}</TableCell>
+                <TableCell>{user.document}</TableCell>
                 <TableCell>{user.fullName}</TableCell>
                 <TableCell>{user.email}</TableCell>
                 <TableCell>{user.role}</TableCell>
-                <TableCell>{user.isBlocked ? "Blocked" : "Active"}</TableCell>
+                <TableCell>{user.isBlocked ? "Bloqueado" : "Activo"}</TableCell>
                 <TableCell className="text-right">
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <Button variant="ghost" className="h-8 w-8 p-0">
-                        <span className="sr-only">Open menu</span>
+                        <span className="sr-only">Abrir menú</span>
                         <MoreHorizontal className="h-4 w-4" />
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
                       <DropdownMenuItem onClick={() => onEdit(user)}>
-                        <Edit className="mr-2 h-4 w-4" /> Edit
+                        <Edit className="mr-2 h-4 w-4" /> Editar
                       </DropdownMenuItem>
                       <DropdownMenuSeparator />
                       {user.isBlocked ? (
                         <DropdownMenuItem
                           onClick={() => handleBlock(user.id, false)}
                         >
-                          <Unlock className="mr-2 h-4 w-4" /> Unblock
+                          <Unlock className="mr-2 h-4 w-4" /> Desbloquear
                         </DropdownMenuItem>
                       ) : (
                         <DropdownMenuItem
                           onClick={() => handleBlock(user.id, true)}
                         >
-                          <Lock className="mr-2 h-4 w-4" /> Block
+                          <Lock className="mr-2 h-4 w-4" /> Bloquear
                         </DropdownMenuItem>
                       )}
-                      <AlertDialog>
-                        <AlertDialogTrigger asChild>
-                          <DropdownMenuItem className="text-red-500 focus:bg-red-500 focus:text-white">
-                            <Trash2 className="mr-2 h-4 w-4" />
-                             Delete
-                          </DropdownMenuItem>
-                        </AlertDialogTrigger>
-                        <AlertDialogContent>
-                          <AlertDialogHeader>
-                            <AlertDialogTitle>
-                              Are you absolutely sure?
-                            </AlertDialogTitle>
-                            <AlertDialogDescription>
-                              This action cannot be undone. This will
-                              permanently delete the user.
-                            </AlertDialogDescription>
-                          </AlertDialogHeader>
-                          <AlertDialogFooter>
-                            <AlertDialogCancel>Cancel</AlertDialogCancel>
-                            <AlertDialogAction
-                              onClick={() => handleDelete(user.id)}
-                            >
-                              Continue
-                            </AlertDialogAction>
-                          </AlertDialogFooter>
-                        </AlertDialogContent>
-                      </AlertDialog>
+                      <DropdownMenuItem
+  onClick={() => {
+    setUserToDelete(user.id);
+    setIsDeleteDialogOpen(true);
+  }}
+  className="text-red-500 focus:bg-red-500 focus:text-white"
+>
+  <Trash2 className="mr-2 h-4 w-4" />
+  Eliminar
+</DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
+                  <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+  <AlertDialogContent>
+    <AlertDialogHeader>
+      <AlertDialogTitle>¿Estás absolutamente seguro?</AlertDialogTitle>
+      <AlertDialogDescription>
+        Esta acción no se puede deshacer. El usuario se eliminará de forma permanente.
+      </AlertDialogDescription>
+    </AlertDialogHeader>
+    <AlertDialogFooter>
+      <AlertDialogCancel onClick={() => setIsDeleteDialogOpen(false)}>
+        Cancelar
+      </AlertDialogCancel>
+      <AlertDialogAction
+        onClick={() => {
+          if (userToDelete) {
+            handleDelete(userToDelete);
+            setIsDeleteDialogOpen(false);
+          }
+        }}
+      >
+        Continuar
+      </AlertDialogAction>
+    </AlertDialogFooter>
+  </AlertDialogContent>
+</AlertDialog>
                 </TableCell>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+            ))
+          )}
+        </TableBody>
+      </Table>
     </>
   );
 }

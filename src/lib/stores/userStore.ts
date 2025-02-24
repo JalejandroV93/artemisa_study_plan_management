@@ -1,7 +1,17 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // src/lib/stores/userStore.ts
 import { create } from 'zustand';
-import { User } from '@prisma/client';  // Import the User type from Prisma
+import { User } from '@prisma/client';
+
+interface FetchUsersParams {
+  page?: number;
+  limit?: number;
+  search?: string;
+  role?: string;
+  isBlocked?: string;
+  sortColumn?: string;
+  sortOrder?: string;
+}
 
 interface UserState {
   users: User[];
@@ -11,7 +21,7 @@ interface UserState {
   totalPages: number;
   loading: boolean;
   error: string | null;
-  fetchUsers: (page?: number, limit?: number, search?: string, role?:string, isBlocked?: string) => Promise<void>;
+  fetchUsers: (params?: FetchUsersParams) => Promise<void>;
   addUser: (user: User) => void;
   updateUser: (user: User) => void;
   deleteUser: (id: string) => void;
@@ -28,23 +38,40 @@ export const useUserStore = create<UserState>((set) => ({
   totalPages: 0,
   loading: false,
   error: null,
-  fetchUsers: async (page = 1, limit = 10, search = '', role?: string, isBlocked?: string) => {
+  fetchUsers: async ({
+    page = 1,
+    limit = 10,
+    search = '',
+    role,
+    isBlocked,
+    sortColumn,
+    sortOrder,
+  }: FetchUsersParams = {}) => {
     set({ loading: true, error: null });
     try {
-      const params = new URLSearchParams({ page: String(page), limit: String(limit), search});
+      // Construcción de la query string con los nuevos parámetros de ordenamiento
+      const params = new URLSearchParams({
+        page: String(page),
+        limit: String(limit),
+        search,
+      });
       if (role) {
         params.append('role', role);
       }
       if (isBlocked) {
         params.append('isBlocked', isBlocked);
       }
+      if (sortColumn) {
+        params.append('sortColumn', sortColumn);
+      }
+      if (sortOrder) {
+        params.append('sortOrder', sortOrder);
+      }
       const response = await fetch(`/api/v1/users?${params.toString()}`);
-
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || "Failed to fetch users");
+        throw new Error(errorData.error || "Error al obtener los usuarios");
       }
-
       const data = await response.json();
       set({
         users: data.users,
@@ -58,14 +85,15 @@ export const useUserStore = create<UserState>((set) => ({
       set({ error: error.message, loading: false });
     }
   },
-  addUser: (user) => set((state) => ({ users: [...state.users, user] })),
+  addUser: (user) =>
+    set((state) => ({ users: [...state.users, user] })),
   updateUser: (updatedUser) =>
     set((state) => ({
       users: state.users.map((user) =>
         user.id === updatedUser.id ? updatedUser : user
       ),
     })),
-    deleteUser: (id) =>
+  deleteUser: (id) =>
     set((state) => ({
       users: state.users.filter((user) => user.id !== id),
     })),
@@ -73,35 +101,36 @@ export const useUserStore = create<UserState>((set) => ({
     try {
       const response = await fetch(`/api/v1/users/${id}/block`, { method: 'PUT' });
       if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(errorData.error || "Failed to block user");
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Error al bloquear el usuario");
       }
       set((state) => ({
         users: state.users.map((user) =>
           user.id === id ? { ...user, isBlocked: true } : user
         ),
       }));
-    } catch (error:any) {
-        console.error('Error blocking user:', error);
-        set({ error: error.message });
+    } catch (error: any) {
+      console.error('Error bloqueando usuario:', error);
+      set({ error: error.message });
     }
   },
   unblockUser: async (id) => {
-      try{
-        const response = await fetch(`/api/v1/users/${id}/unblock`, { method: 'PUT' });
-        if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.error || "Failed to unblock user");
-        }
-        set((state) => ({
-          users: state.users.map((user) =>
-            user.id === id ? { ...user, isBlocked: false } : user
-          ),
-        }));
+    try {
+      const response = await fetch(`/api/v1/users/${id}/unblock`, { method: 'PUT' });
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Error al desbloquear el usuario");
+      }
+      set((state) => ({
+        users: state.users.map((user) =>
+          user.id === id ? { ...user, isBlocked: false } : user
+        ),
+      }));
     } catch (error: any) {
-        console.error('Error unblocking user:', error);
-        set({ error: error.message });
+      console.error('Error desbloqueando usuario:', error);
+      set({ error: error.message });
     }
   },
-  clearUsers: () => set({ users: [], totalUsers: 0, page: 1, totalPages: 0, error: null }),
+  clearUsers: () =>
+    set({ users: [], totalUsers: 0, page: 1, totalPages: 0, error: null }),
 }));

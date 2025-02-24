@@ -48,6 +48,7 @@ model Section {
 model Grade {
   id          String       @id @default(uuid())
   name        String       // e.g., "Ninth", "Tenth"
+  colombianGrade Int?
   sectionId   String
   section     Section      @relation(fields: [sectionId], references: [id])
   groups      Group[]

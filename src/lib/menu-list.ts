@@ -8,7 +8,9 @@ import {
   Users2,  // Icon for Groups
   Book, //Icon for Subjects
   CalendarDays, //Icon for Trimesters
-  BrainCircuit, //Icon for Picasso Promp
+  BrainCircuit,
+  School,
+  School2, //Icon for Picasso Promp
 } from "lucide-react";
 
 import { UserPayload } from "@/types/user";
@@ -66,25 +68,52 @@ export function getMenuList(pathname: string, user: UserPayload | null): Group[]
       menus: [
         {
           href: "/v1/settings/users",
-          label: "Administrar Usuarios",
+          label: "Usuarios",
           icon: Users,
           roles: ['ADMIN'],
         },
         {
-          href: "/v1/settings/groups",
-          label: "Administrar Grupos",
-          icon: Users2,
+          href: "/v1/settings/school",
+          label: "Colegio",
+          icon: School,
           roles: ['ADMIN'],
+          submenus: [
+            {
+              href: "/v1/settings/sections",
+              label: "Secciones",
+              icon: School2,
+              roles: ['ADMIN'],
+            },
+            {
+              href: "/v1/settings/grades",
+              label: "Grados",
+              icon: Book,
+              roles: ['ADMIN'],
+            },
+            {
+              href: "/v1/settings/groups",
+              label: "Grupos",
+              icon: Users2,
+              roles: ['ADMIN'],
+            },
+
+            {
+              href: "/v1/settings/trimesters",
+              label: "Trimestres",
+              icon: CalendarDays,
+              roles: ['ADMIN'],
+            }
+          ],
         },
         {
           href: "/v1/settings/subjects",
-          label: "Administrar Materias",
+          label: "Materias",
           icon: Book,
           roles: ['ADMIN'],
         },
         {
           href: "/v1/settings/trimesters",
-          label: "Administrar Trimestres",
+          label: "Trimestres",
           icon: CalendarDays,
           roles: ['ADMIN'],
         },

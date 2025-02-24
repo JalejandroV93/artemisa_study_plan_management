@@ -14,27 +14,27 @@ const updateUserSchema = z.object({
 // GET /api/users/[id] - Get a single user by ID
 export async function GET(
   request: Request,
-  { params }: { params: Promise<{ userId: string }> }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   const user = await getCurrentUser();
   if (!user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
   }
 
-  const { userId } = await params;
+  const { id } = await params;
 
-  if (!userId) {
+  if (!id) {
     return NextResponse.json({ error: "User ID is required" }, { status: 400 });
   }
 
   // Only admins can get any user, otherwise users can only get their own data
-  if (user.role !== "ADMIN" && user.id !== userId) {
+  if (user.role !== "ADMIN" && user.id !== id) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
   try {
     const fetchedUser = await prisma.user.findUnique({
-      where: { id: userId },
+      where: { id: id },
       select: {
         // Select only necessary fields
         id: true,
@@ -67,15 +67,15 @@ export async function GET(
 // PUT /api/users/[id] - Update a user
 export async function PUT(
   request: Request,
-  { params }: { params: Promise<{ userId: string }> }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   const user = await getCurrentUser();
   if (!user || user.role !== "ADMIN") {
     return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
   }
 
-  const { userId } = await params;
-  if (!userId) {
+  const { id } = await params;
+  if (!id) {
     return NextResponse.json({ error: "User ID is required" }, { status: 400 });
   }
 
@@ -84,7 +84,7 @@ export async function PUT(
     const validatedData = updateUserSchema.parse(body); //Validate
 
     const updatedUser = await prisma.user.update({
-      where: { id: userId },
+      where: { id: id },
       data: validatedData,
     });
 
@@ -115,21 +115,22 @@ export async function PUT(
 // DELETE /api/users/[id] - Delete a user
 export async function DELETE(
   request: Request,
-  { params }: { params: Promise<{ userId: string }> }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   const user = await getCurrentUser();
   if (!user || user.role !== "ADMIN") {
     return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
   }
 
-  const { userId } = await params;
-  if (!userId) {
+  const { id } = await params;
+  console.log("id" , id);
+  if (!id) {
     return NextResponse.json({ error: "User ID is required" }, { status: 400 });
   }
 
   try {
     await prisma.user.delete({
-      where: { id: userId },
+      where: { id: id },
     });
 
     return NextResponse.json({ message: "User deleted successfully" });

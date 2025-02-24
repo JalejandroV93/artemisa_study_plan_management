@@ -45,17 +45,17 @@ const UsersPage = () => {
     <div className="flex justify-end mb-4">
       <Dialog open={isFormOpen} onOpenChange={handleDialogOpenChange}>
         <DialogTrigger asChild>
-          <Button>Create User</Button>
+          <Button>Crear usuario</Button>
         </DialogTrigger>
         <DialogContent className="max-w-[425px] md:max-w-4xl">
           <DialogHeader>
             <DialogTitle>
-              {selectedUser ? "Edit User" : "Create User"}
+              {selectedUser ? "Editar Usuario" : "Crear Usuario"}
             </DialogTitle>
             <DialogDescription>
               {selectedUser
-                ? "Make changes to the user information."
-                : "Add a new user to the system."}
+                ? "Actualizar la información del usuario."
+                : "Agregar un nuevo usuario al sistema."}
             </DialogDescription>
           </DialogHeader>
           <UserForm

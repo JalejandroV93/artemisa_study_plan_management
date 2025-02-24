@@ -478,3 +478,33 @@ export function DashboardSkeleton() {
     </div>
   );
 }
+
+export const SkeletonRows = () => {
+  return (
+    <>
+      {Array.from({ length: 5 }).map((_, index) => (
+        <TableRow key={index}>
+          <TableCell>
+            <div className="skeleton h-4 w-24 bg-gray-300 rounded" />
+          </TableCell>
+          <TableCell>
+            <div className="skeleton h-4 w-20 bg-gray-300 rounded" />
+          </TableCell>
+          <TableCell>
+            <div className="skeleton h-4 w-32 bg-gray-300 rounded" />
+          </TableCell>
+          <TableCell>
+            <div className="skeleton h-4 w-28 bg-gray-300 rounded" />
+          </TableCell>
+          <TableCell>
+            <div className="skeleton h-4 w-20 bg-gray-300 rounded" />
+          </TableCell>
+          <TableCell>
+            <div className="skeleton h-4 w-16 bg-gray-300 rounded" />
+          </TableCell>
+          <TableCell></TableCell>
+        </TableRow>
+      ))}
+    </>
+  );
+};
