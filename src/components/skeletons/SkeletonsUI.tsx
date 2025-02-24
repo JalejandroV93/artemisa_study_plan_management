@@ -510,3 +510,25 @@ export const SkeletonRows = () => {
     </Table>
   );
 };
+
+
+export function SkeletonCard() {
+  return (
+      <Card className="p-6">
+          <div className="flex justify-between items-start mb-4">
+              <div>
+                  <Skeleton className="h-6 w-40 mb-2" />
+                  <Skeleton className="h-4 w-32" />
+              </div>
+              <Skeleton className="h-8 w-8" />
+          </div>
+          <div className="space-y-4">
+              <div>
+              <Skeleton className="h-4 w-1/2 mb-2" />
+                  <Skeleton className="h-4 w-full" />
+              </div>
+               <Skeleton className="h-10 w-full" />
+          </div>
+      </Card>
+  )
+}
