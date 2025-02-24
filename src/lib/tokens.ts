@@ -7,17 +7,26 @@ import { config } from './config';
 export const createToken = async (payload: JWTPayload): Promise<string> => {
   return await new SignJWT(payload)
     .setProtectedHeader({ alg: 'HS256' })
+    .setIssuedAt() // Agrega la marca de tiempo "iat"
     .setExpirationTime('1d') // 1 day expiration
     .sign(new TextEncoder().encode(config.authSecret));
 };
 
-// Function to verify the token
 export const verifyToken = async <T extends JWTPayload>(token: string): Promise<T> => {
   try {
     const { payload } = await jwtVerify(token, new TextEncoder().encode(config.authSecret));
+    
+    // Validación adicional del token: comprobar la antigüedad basada en "iat"
+    const now = Math.floor(Date.now() / 1000); // Tiempo actual en segundos
+    const maxAge = 60 * 60 * 24; // Umbral de 24 horas (puedes ajustar este valor)
+    
+    if (payload.iat && (now - payload.iat > maxAge)) {
+      throw new Error("Token expirado, renovarlo");
+    }
+    
     return payload as T;
   } catch (error) {
-    console.error("Token verification error:", error); // Detailed error logging
-    throw new Error('Token inválido'); // Consistent error message
+    console.error("Error al verificar el token:", error);
+    throw new Error('Token inválido');
   }
 };
