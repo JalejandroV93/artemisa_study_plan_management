@@ -3,7 +3,6 @@
 
 import { useFormContext } from "react-hook-form";
 import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
-import { Textarea } from "@/components/ui/textarea";
 import { DynamicArrayInput } from "@/components/ui/DynamicArrayInput";
 import { z } from "zod";
 
@@ -24,14 +23,13 @@ export const trimesterFormSchema = z.object({ // Export this for use in GradeOff
 interface TrimesterFormProps {
   trimesterNumber: number;
   gradeId: string; // Add gradeId prop
-  groupId: string; // Add groupId prop
 }
 
 
-export function TrimesterForm({ trimesterNumber, gradeId, groupId }: TrimesterFormProps) {
+export function TrimesterForm({ trimesterNumber, gradeId }: TrimesterFormProps) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { control } = useFormContext<any>(); // Using 'any' temporarily, will be replaced with a more specific type later.
-  const fieldName = `gradeOfferings.${gradeId}.${groupId}.trimesters.${trimesterNumber}`;
+  const fieldName = `gradeOfferings.${gradeId}.trimesters.${trimesterNumber}`;
 
   return (
     <div className="space-y-4">
@@ -44,7 +42,11 @@ export function TrimesterForm({ trimesterNumber, gradeId, groupId }: TrimesterFo
                 <FormItem>
                 <FormLabel>Benchmark</FormLabel>
                 <FormControl>
-                    <Textarea placeholder="Enter benchmark" {...field} />
+                    <DynamicArrayInput
+                        values={field.value || []}
+                        onChange={(newValues) => field.onChange(newValues)}
+                        placeholder="Add a learning evidence..."
+                    />
                 </FormControl>
                 <FormMessage />
                 </FormItem>

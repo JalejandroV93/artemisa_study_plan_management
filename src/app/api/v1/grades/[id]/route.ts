@@ -66,21 +66,22 @@ export async function PUT(request: Request, { params }: { params: { id: string }
 
 // DELETE /api/v1/grades/[id]
 export async function DELETE(request: Request, { params }: { params: { id: string } }) {
-    const user = await getCurrentUser();
-    if (!user || user.role !== 'ADMIN') {
-        return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
-    }
-  try {
-    // Transaction: Delete associated groups and gradeOfferings first
-    await prisma.$transaction([
-      prisma.group.deleteMany({ where: { gradeId: params.id } }),
-      prisma.gradeOffering.deleteMany({ where: { gradeId: params.id } }), // Important!
-      prisma.grade.delete({ where: { id: params.id } }),
-    ]);
-
-    return NextResponse.json({ message: 'Grade deleted successfully' });
-  } catch (error) {
-    console.error("Error deleting grade:", error);
-    return NextResponse.json({ error: 'Failed to delete grade' }, { status: 500 });
+  const user = await getCurrentUser();
+  if (!user || user.role !== 'ADMIN') {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
   }
+try {
+  // Transaction: Delete associated groups, enrollments and gradeOfferings first
+  await prisma.$transaction([
+    prisma.enrollment.deleteMany({ where: { gradeOffering: {gradeId: params.id} } }), // Delete associated Enrollments
+    prisma.group.deleteMany({ where: { gradeId: params.id } }), // Delete Associated Groups
+    prisma.gradeOffering.deleteMany({ where: { gradeId: params.id } }), // Delete Associated Grade Offerings
+    prisma.grade.delete({ where: { id: params.id } }), // Finally delete the grade
+  ]);
+
+  return NextResponse.json({ message: 'Grade deleted successfully' });
+} catch (error) {
+  console.error("Error deleting grade:", error);
+  return NextResponse.json({ error: 'Failed to delete grade' }, { status: 500 });
+}
 }

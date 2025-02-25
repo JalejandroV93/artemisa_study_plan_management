@@ -116,7 +116,7 @@ model GradeOffering {
   createdAt     DateTime     @default(now())
   updatedAt     DateTime     @updatedAt
 
-
+  @@unique([subjectId, gradeId]) 
   @@index([subjectId])
   @@index([gradeId])
 }
@@ -133,6 +133,7 @@ model Enrollment {
 
   @@index([groupId])
   @@index([gradeOfferingId])
+  @@unique([groupId, gradeOfferingId])
 }
 
 

@@ -35,6 +35,16 @@ export async function GET(request: Request, { params }: { params: { id: string }
                 id: true
               }
             },
+            enrollments:{
+              include:{
+                group: {
+                  select:{
+                    name: true,
+                    id: true
+                  }
+                }
+              }
+            }
           },
         },
       },

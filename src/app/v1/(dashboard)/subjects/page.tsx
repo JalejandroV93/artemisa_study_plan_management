@@ -1,3 +1,4 @@
+
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
@@ -33,6 +34,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { SkeletonCard } from "@/components/skeletons/SkeletonsUI";
+import { ContentLayout } from "@/components/panel-layout/content-layout";
 
 export default function SubjectsPage() {
   const [selectedGrade, setSelectedGrade] = useState<string | null>(null); // Use null for "All Grades"
@@ -119,7 +121,8 @@ export default function SubjectsPage() {
   };
 
   return (
-    <div className="container py-8">
+    <ContentLayout title="Planes de estudio">
+    <div className=" py-8">
       <div className="flex items-center justify-between mb-8">
         <div>
           <h1 className="text-4xl font-bold text-gray-900">Subjects</h1>
@@ -245,5 +248,6 @@ export default function SubjectsPage() {
         </AlertDialogContent>
       </AlertDialog>
     </div>
+    </ContentLayout>
   );
 }

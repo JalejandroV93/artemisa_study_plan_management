@@ -5,13 +5,13 @@ import { useFormContext } from "react-hook-form";
 import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
 import { Textarea } from "@/components/ui/textarea";
 import { TrimesterForm, trimesterFormSchema } from "./TrimesterForm"; // Import TrimesterForm
-import { Grade, Group, TrimesterSettings } from "@prisma/client";
+import { Grade,  TrimesterSettings } from "@prisma/client";
 import {
-    Accordion,
-    AccordionContent,
-    AccordionItem,
-    AccordionTrigger,
-  } from "@/components/ui/accordion";
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 import { z } from "zod";
 
 // Define a schema for a single GradeOffering
@@ -22,26 +22,24 @@ export const gradeOfferingSchema = z.object({ // Export this
 
 
 interface GradeOfferingFormProps {
-  grade: Grade & {groups: Group[]};
+  grade: Grade;
   trimesterSettings: TrimesterSettings[]; // Add trimesterSettings prop
 }
 
 export function GradeOfferingForm({ grade, trimesterSettings }: GradeOfferingFormProps) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { control } = useFormContext<any>(); // Replace 'any' later.
-    //console.log(trimesterSettings)
     return (
-      <Accordion type="multiple" defaultValue={grade.groups.map(group => group.id)} className="w-full">
-        {grade.groups.map((group) => (
-          <AccordionItem key={group.id} value={group.id}>
+      <Accordion type="multiple" defaultValue={[grade.id]} className="w-full">
+          <AccordionItem  value={grade.id}>
             <AccordionTrigger>
-              {grade.name} - Group {group.name}
+              {grade.name}
             </AccordionTrigger>
             <AccordionContent>
               <div className="space-y-4 pt-4">
                 <FormField
                   control={control}
-                  name={`gradeOfferings.${grade.id}.${group.id}.finalReport`}
+                  name={`gradeOfferings.${grade.id}.finalReport`}
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Final Report</FormLabel>
@@ -58,13 +56,11 @@ export function GradeOfferingForm({ grade, trimesterSettings }: GradeOfferingFor
                     key={trimesterSetting.number}
                     trimesterNumber={trimesterSetting.number}
                     gradeId={grade.id}
-                    groupId={group.id}
                   />
                 ))}
               </div>
             </AccordionContent>
           </AccordionItem>
-        ))}
       </Accordion>
     );
 }

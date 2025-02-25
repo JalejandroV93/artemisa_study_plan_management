@@ -22,15 +22,14 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { useToast } from "@/hooks/use-toast";
-import { Subject, GradeOffering, Trimester, Benchmark, Project } from "@prisma/client"; // Import Project
+import { Subject, Trimester, Benchmark, Project } from "@prisma/client"; // Import Project
 import { Skeleton } from "@/components/ui/skeleton"; // Import Skeleton
 import { useAuth } from "@/components/providers/AuthProvider";
 
 //Extends interfaces or types
 type ExtendedTrimester = Trimester & { benchmarks: Benchmark[] };
-type ExtendedGradeOffering = GradeOffering & { trimesters: ExtendedTrimester[]; grade: {name: string, id: string}; group:{name: string} };
 //Crucially, add the crossCuttingProjects here:
-type ExtendedSubject = Subject & { gradeOfferings: ExtendedGradeOffering[], crossCuttingProjects: Project[] };
+type ExtendedSubject = Subject & { gradeOfferings: { trimesters: ExtendedTrimester[]; grade: {name: string, id: string}}[], crossCuttingProjects: Project[] };
 
 
 export default function SubjectDetailPage() {
@@ -240,7 +239,6 @@ list-outside text-gray-600 mb-4"
           <Card key={offering.id} className="p-6">
             <h2 className="text-2xl font-semibold mb-4">
               Grade {offering.grade.name}
-              {offering.group ? ` - Group ${offering.group.name}` : ""}
             </h2>
 
             <div className="mb-6">

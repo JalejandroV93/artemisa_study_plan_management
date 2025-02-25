@@ -32,8 +32,12 @@ export async function GET(request: Request) {
           where: {
               gradeId: gradeId || undefined
           },
-          select: {
-            gradeId: true,
+          select: { 
+            grade: {
+              select:{
+                name: true
+              }
+            },
           }
         },
         crossCuttingProjects: true // Include related projects
