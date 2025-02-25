@@ -75,7 +75,7 @@ export function GeneralInformationForm() {
         )}
       />
 
-      <div>
+      <div className="flex flex-col space-y-2">
         <FormLabel>Objetivos Específicos</FormLabel>
         {specificObjectives.map((_, index) => (
           <FormField

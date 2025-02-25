@@ -1,130 +1,129 @@
-// src/components/subjects/GradeOfferingsForm.tsx
-"use client";
+"use client"
 
-import { useFormContext } from "react-hook-form";
-import { Grade, AcademicCalendarSettings, TrimesterSettings, Section, Group } from "@prisma/client";
-import { GradeOfferingForm } from "./GradeOfferingForm";
-import { GradeGroupSelection } from "./GradeGroupSelection";
-import { SubjectFormValues } from "./FormSchemas"; // Import type
-import { useState, useEffect } from "react";
+import { useFormContext } from "react-hook-form"
+import type { Grade, AcademicCalendarSettings, TrimesterSettings, Section } from "@prisma/client"
+import { GradeOfferingForm } from "./GradeOfferingForm"
+import type { SubjectFormValues } from "./FormSchemas"
+import { useState, useEffect, useCallback } from "react"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Skeleton } from "@/components/ui/skeleton"
+import { Switch } from "@/components/ui/switch"
 
 interface GradeOfferingsFormProps {
-    grades: Grade[];
-    academicYear: (AcademicCalendarSettings & { trimesters: TrimesterSettings[] }) | null;
-    initialSelectedGrades: string[]; // Add this prop
-    initialGradeOfferings: { gradeId: string; groups?: { name: string }[] }[]; // Add this
-
+  grades: Grade[]
+  academicYear: (AcademicCalendarSettings & { trimesters: TrimesterSettings[] }) | null
+  initialSelectedGrades: string[]
 }
 
 export function GradeOfferingsForm({ grades, academicYear, initialSelectedGrades }: GradeOfferingsFormProps) {
-    const { setValue, getValues } = useFormContext<SubjectFormValues>();  // Correct type
-    const [selectedGrades, setSelectedGrades] = useState<string[]>(initialSelectedGrades || []);
-    const [sections, setSections] = useState<(Section & { grades: (Grade & { groups: Group[] })[] })[]>([]);
-    const [, setLoading] = useState(true);
+  const { setValue, getValues } = useFormContext<SubjectFormValues>()
+  const [selectedGrades, setSelectedGrades] = useState<string[]>(initialSelectedGrades || [])
+  const [sections, setSections] = useState<(Section & { grades: Grade[] })[]>([])
+  const [isLoading, setIsLoading] = useState(true)
 
-     // Fetch Sections
-     const fetchSections = async () => {
-      setLoading(true)
-      try {
-        const res = await fetch("/api/v1/sections?includeGradesAndGroups=true");  // Add query parameter
-        if (!res.ok) {
-          throw new Error("Failed to fetch sections");
-        }
-        const data = await res.json();
-        setSections(data);
-      } catch (error) {
-        console.error("Error fetching sections: ", error);
-      } finally {
-        setLoading(false)
+  const fetchSections = useCallback(async () => {
+    try {
+      setIsLoading(true)
+      const res = await fetch("/api/v1/sections?includeGradesAndGroups=true")
+      if (!res.ok) {
+        throw new Error("Failed to fetch sections")
       }
-    };
+      const data = await res.json()
+      const sectionsWithGrades = data.map((section: Section & { grades?: Grade[] }) => ({
+        ...section,
+        grades: section.grades ?? [],
+      }))
+      setSections(sectionsWithGrades)
+    } catch (error) {
+      console.error("Error fetching sections: ", error)
+    } finally {
+      setIsLoading(false)
+    }
+  }, [])
 
-    useEffect(() => {
-      fetchSections();
-    }, []);
+  useEffect(() => {
+    fetchSections()
+  }, [fetchSections])
 
-    // Initialize selectedGrades from initialSelectedGrades
-    useEffect(() => {
-      setSelectedGrades(initialSelectedGrades || []);
-    }, [initialSelectedGrades]);
+  useEffect(() => {
+    setSelectedGrades(initialSelectedGrades || [])
+  }, [initialSelectedGrades])
 
-
-    const handleGradeChange = (gradeId: string, checked: boolean) => {
-      setSelectedGrades((prev) => {
-        if (checked) {
-          // Add the grade ID to selected grades.
-          return [...prev, gradeId];
-        } else {
-          // Remove the grade ID, and also remove any associated gradeOfferings data.
-          const updatedGrades = prev.filter((id) => id !== gradeId);
-
-           // Get current gradeOfferings and remove data for the unselected grade
-           const currentGradeOfferings = getValues("gradeOfferings") || {};
-           const { [gradeId]: removedGrade, ...remainingGrades } = currentGradeOfferings;
-        console.log(removedGrade);
-            // Set Value
-            setValue("gradeOfferings", remainingGrades);
-            return updatedGrades;
-        }
-      });
-    };
-
-     // New handler for group changes
-     const handleGroupChange = (gradeId: string, groupName: string, checked: boolean) => {
-      const currentGradeOfferings = getValues("gradeOfferings") || {};
-
+  const handleGradeChange = (gradeId: string, checked: boolean) => {
+    setSelectedGrades((prev) => {
       if (checked) {
-          // Add group to the gradeOffering.
-          const existingOffering = currentGradeOfferings[gradeId] || { gradeId, trimesters: {}, groups: [] };
-          const updatedGroups = [...(existingOffering.groups || []), { name: groupName }];  // Add group
-
-          setValue(`gradeOfferings.${gradeId}`, {
-              ...existingOffering,
-              groups: updatedGroups,
-          });
-
+        return [...prev, gradeId]
       } else {
-          // Remove group from the gradeOffering.
-          if (currentGradeOfferings[gradeId]) {
-              const updatedGroups = currentGradeOfferings[gradeId].groups?.filter((g: { name: string }) => g.name !== groupName) || [];
-              setValue(`gradeOfferings.${gradeId}.groups`, updatedGroups);
-
-               // Remove gradeOffering if no groups are selected
-               if (updatedGroups.length === 0) {
-                const { [gradeId]: removedGrade, ...remainingGrades } = currentGradeOfferings;
-                console.log(removedGrade);
-                setValue("gradeOfferings", remainingGrades);
-            }
-
-          }
+        const updatedGrades = prev.filter((id) => id !== gradeId)
+        const currentGradeOfferings = getValues("gradeOfferings") || {}
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { [gradeId]: _removedGrade, ...remainingGrades } = currentGradeOfferings
+        setValue("gradeOfferings", remainingGrades)
+        return updatedGrades
       }
-    };
+    })
+  }
 
-    // Make sure grades are available
-    if(!grades) return <p>Loading</p>
+  if (!grades) return <p>Loading...</p>
 
-    return (
-        <div className="space-y-4">
-            <h2 className="text-xl font-semibold">Grade Offerings</h2>
-            <GradeGroupSelection
-                sections={sections}
-                selectedGrades={selectedGrades}
-                onGradeChange={handleGradeChange}
-                onGroupChange={handleGroupChange} // Pass down the new handler
-                gradeOfferings={Object.values(getValues("gradeOfferings") || {})} //Important
-            />
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <h2 className="text-2xl font-semibold text-gray-900">Grade Offerings</h2>
+      </div>
 
-            {selectedGrades.map((gradeId) => {
-                const grade = grades.find((g) => g.id === gradeId);
-                if (!grade) return null;
-                return (
-                    <GradeOfferingForm
-                        key={gradeId}
-                        grade={grade}
-                        trimesterSettings={academicYear?.trimesters || []}
-                    />
-                );
-            })}
+      {isLoading ? (
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+          {[1, 2, 3].map((i) => (
+            <Card key={i} className="border-2">
+              <CardHeader>
+                <Skeleton className="h-6 w-24" />
+              </CardHeader>
+              <CardContent className="space-y-3">
+                {[1, 2, 3].map((j) => (
+                  <Skeleton key={j} className="h-8 w-full" />
+                ))}
+              </CardContent>
+            </Card>
+          ))}
         </div>
-    );
+      ) : (
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+          {sections.map((section) => (
+            <Card key={section.id} className="border-2">
+              <CardHeader>
+                <CardTitle className="text-lg font-semibold">{section.name}</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                {section.grades.map((grade) => (
+                  <div
+                    key={grade.id}
+                    className="flex items-center justify-between rounded-lg border p-3 hover:bg-gray-50"
+                  >
+                    <span className="text-sm font-medium text-gray-700">{grade.name}</span>
+                    <Switch
+                      id={`grade-${grade.id}`}
+                      checked={selectedGrades.includes(grade.id)}
+                      onCheckedChange={(checked) => handleGradeChange(grade.id, checked)}
+                    />
+                  </div>
+                ))}
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
+
+      {selectedGrades.length > 0 && (
+        <div className="mt-8 space-y-6">
+          {selectedGrades.map((gradeId) => {
+            const grade = grades.find((g) => g.id === gradeId)
+            if (!grade) return null
+            return <GradeOfferingForm key={gradeId} grade={grade} trimesterSettings={academicYear?.trimesters || []} />
+          })}
+        </div>
+      )}
+    </div>
+  )
 }
+
