@@ -5,7 +5,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { ArrowLeft, Edit, Printer } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card"; // Removed CardContent, CardHeader, CardTitle
+import { Card } from "@/components/ui/card";
 import { Logo } from "@/components/ui/logo";
 import { useParams, useRouter } from "next/navigation";
 import {
@@ -22,14 +22,22 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { useToast } from "@/hooks/use-toast";
-import { Subject, Trimester, Benchmark, Project } from "@prisma/client"; // Import Project
+import { Subject, Trimester, Benchmark, Project, Grade, Group } from "@prisma/client"; // Import Project
 import { Skeleton } from "@/components/ui/skeleton"; // Import Skeleton
 import { useAuth } from "@/components/providers/AuthProvider";
-
+import { GradeOffering, Enrollment } from "@prisma/client";
 //Extends interfaces or types
 type ExtendedTrimester = Trimester & { benchmarks: Benchmark[] };
+
 //Crucially, add the crossCuttingProjects here:
-type ExtendedSubject = Subject & { gradeOfferings: { trimesters: ExtendedTrimester[]; grade: {name: string, id: string}}[], crossCuttingProjects: Project[] };
+type ExtendedSubject = Subject & {
+     gradeOfferings: (GradeOffering & {
+        trimesters: ExtendedTrimester[];
+        grade: Grade;
+        enrollments: (Enrollment & { group: Group })[]; // Include enrollments and groups
+      })[];
+     crossCuttingProjects: Project[]
+ };
 
 
 export default function SubjectDetailPage() {

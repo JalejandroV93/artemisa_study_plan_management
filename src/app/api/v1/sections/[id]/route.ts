@@ -9,14 +9,18 @@ const updateSectionSchema = z.object({
 });
 
 // GET /api/v1/sections/[id] - Get a section by ID
-export async function GET(request: Request, { params }: { params: { id: string } }) {
+export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  if (!id) {
+    return NextResponse.json({ error: "User ID is required" }, { status: 400 });
+  }
     const user = await getCurrentUser();
     if (!user || user.role !== 'ADMIN') {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
     }
   try {
     const section = await prisma.section.findUnique({
-      where: { id: params.id },
+      where: { id: id },
       include: { grades: true }, // Include related grades
     });
 
@@ -32,7 +36,11 @@ export async function GET(request: Request, { params }: { params: { id: string }
 }
 
 // PUT /api/v1/sections/[id] - Update a section
-export async function PUT(request: Request, { params }: { params: { id: string } }) {
+export async function PUT(request: Request, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  if (!id) {
+    return NextResponse.json({ error: "User ID is required" }, { status: 400 });
+  }
     const user = await getCurrentUser();
     if (!user || user.role !== 'ADMIN') {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
@@ -42,7 +50,7 @@ export async function PUT(request: Request, { params }: { params: { id: string }
     const { name } = updateSectionSchema.parse(body);
 
     const updatedSection = await prisma.section.update({
-      where: { id: params.id },
+      where: { id: id },
       data: {
         name,
       },
@@ -61,7 +69,11 @@ export async function PUT(request: Request, { params }: { params: { id: string }
 }
 
 // DELETE /api/v1/sections/[id] - Delete a section
-export async function DELETE(request: Request, { params }: { params: { id: string } }) {
+export async function DELETE(request: Request, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  if (!id) {
+    return NextResponse.json({ error: "User ID is required" }, { status: 400 });
+  }
     const user = await getCurrentUser();
     if (!user || user.role !== 'ADMIN') {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
@@ -69,8 +81,8 @@ export async function DELETE(request: Request, { params }: { params: { id: strin
   try {
     // IMPORTANT:  Handle deletion with associated grades.  You *MUST* use a transaction.
     await prisma.$transaction([
-      prisma.grade.deleteMany({ where: { sectionId: params.id } }), // Delete associated grades FIRST
-      prisma.section.delete({ where: { id: params.id } }),
+      prisma.grade.deleteMany({ where: { sectionId: id } }), // Delete associated grades FIRST
+      prisma.section.delete({ where: { id: id } }),
     ]);
 
     return NextResponse.json({ message: 'Section deleted successfully' });

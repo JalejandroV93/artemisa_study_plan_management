@@ -3,17 +3,7 @@ import { prisma } from '@/lib/prisma';
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { getCurrentUser } from '@/lib/auth';
-
-const updateSubjectSchema = z.object({
-  name: z.string().min(1, "Subject name is required").optional(),
-  vision: z.string().optional(),
-  mission: z.string().optional(),
-  generalObjective: z.string().optional(),
-  specificObjectives: z.array(z.string()).optional(), // Array of strings
-  didactics: z.string().optional(),
-  crossCuttingProjects: z.array(z.string().uuid()).optional(), // Array of *Project IDs* for connecting/disconnecting
-  isActive: z.boolean().optional(),
-});
+import { updateSubjectSchema } from '@/components/subjects/FormSchemas'; // Import the Zod schema
 
 // GET /api/v1/subjects/[id] (Get Single Subject)
 export async function GET(request: Request, { params }: { params: { id: string } }) {
@@ -29,16 +19,16 @@ export async function GET(request: Request, { params }: { params: { id: string }
                 benchmarks: true,
               },
             },
-            grade: {
+            grade: {  // Include the related Grade
               select: {
                 name: true,
                 id: true
               }
             },
-            enrollments:{
-              include:{
-                group: {
-                  select:{
+            enrollments: { // Include enrollments
+              include: {
+                group: {  // Include the related Group within each enrollment
+                  select: {
                     name: true,
                     id: true
                   }
@@ -70,33 +60,72 @@ export async function PUT(request: Request, { params }: { params: { id: string }
 
   try {
     const body = await request.json();
-    const validatedData = updateSubjectSchema.parse(body);
+    const validatedData = updateSubjectSchema.parse(body); // Validate with the *update* schema.
 
-      const updatedSubject = await prisma.subject.update({
-          where: { id: params.id },
-          data: {
-              name: validatedData.name,
-              vision: validatedData.vision,
-              mission: validatedData.mission,
-              generalObjective: validatedData.generalObjective,
-              specificObjectives: validatedData.specificObjectives, //  Update string[]
-              didactics: validatedData.didactics,
-              isActive: validatedData.isActive,
-              ...(validatedData.crossCuttingProjects && { //Conditional Update for Many to Many
-                crossCuttingProjects: {
-                    set: validatedData.crossCuttingProjects.map(id => ({ id })), // set replaces all existing relations
-                  },
-              }),
-          },
-          include:{ // Include for return
-              crossCuttingProjects: true
+      const updatedSubject = await prisma.$transaction(async (tx) => {
+
+          const updated = await tx.subject.update({
+              where: { id: params.id },
+              data: {
+                  name: validatedData.name,
+                  vision: validatedData.vision,
+                  mission: validatedData.mission,
+                  generalObjective: validatedData.generalObjective,
+                  specificObjectives: validatedData.specificObjectives,
+                  didactics: validatedData.didactics,
+                  isActive: validatedData.isActive,
+                  ...(validatedData.crossCuttingProjects && {
+                      crossCuttingProjects: {
+                          set: validatedData.crossCuttingProjects.map(id => ({ id })),
+                      },
+                  }),
+              },
+                include: {
+                    crossCuttingProjects: true,
+                }
+          });
+
+        // Handle GradeOfferings (if provided)
+        if (validatedData.gradeOfferings) {
+          for (const [gradeId, offeringData] of Object.entries(validatedData.gradeOfferings)) {
+              const gradeOfferingId = (await tx.gradeOffering.findUnique({
+                where: {
+                  subjectId_gradeId: {
+                    subjectId: params.id,
+                    gradeId: gradeId
+                  }
+                },
+                select: {
+                  id: true // Only need the ID
+                }
+              }))?.id
+
+              if (gradeOfferingId) {
+                  // If found a grade offering, Update existing GradeOffering
+                  await tx.gradeOffering.update({
+                      where: { id: gradeOfferingId },
+                      data: {
+                          finalReport: offeringData.finalReport,
+                      },
+                  });
+              }  else {
+                  // Create new grade offering (if no exists)
+                  await tx.gradeOffering.create({
+                      data: {
+                          subjectId: params.id,
+                          gradeId: gradeId,
+                          finalReport: offeringData.finalReport || '',
+                      },
+                  });
+            }
           }
-      });
+        }
 
-
-    return NextResponse.json(updatedSubject);
+        return updated;
+    });
+      return NextResponse.json(updatedSubject);
   } catch (error) {
-    if (error instanceof z.ZodError) {
+     if (error instanceof z.ZodError) {
       return NextResponse.json({ error: error.format() }, { status: 400 });
     }
     if (error && typeof error === 'object' && 'code' in error && error.code === 'P2002') {

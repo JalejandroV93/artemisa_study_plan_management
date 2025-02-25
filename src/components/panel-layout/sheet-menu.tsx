@@ -22,13 +22,10 @@ import { usePathname } from "next/navigation";
 
 export function SheetMenu() {
 
-    // Add this: Get user and menuList.  This is *identical* to PanelLayout.
     const { user } = useAuth();
     const pathname = usePathname();
     const menuList = getMenuList(pathname, user);
 
-    // Add this console log
-    console.log("SheetMenu - menuList:", menuList);
 
   return (
     <Sheet>

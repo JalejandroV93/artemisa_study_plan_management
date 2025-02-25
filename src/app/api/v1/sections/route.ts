@@ -9,21 +9,42 @@ const createSectionSchema = z.object({
 });
 
 // GET /api/v1/sections - Get all sections
-export async function GET() {
-    const user = await getCurrentUser();
-    if (!user || user.role !== 'ADMIN') {
-        return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
-    }
+export async function GET(request: Request) {
+  const { searchParams } = new URL(request.url);
+  const includeGradesAndGroups = searchParams.get('includeGradesAndGroups') === 'true'; //Important
 
-    try {
-        const sections = await prisma.section.findMany({
-            orderBy: { name: 'asc' }, // Order alphabetically
-        });
-        return NextResponse.json(sections);
-    } catch (error) {
-        console.error("Error fetching sections:", error);
-        return NextResponse.json({ error: 'Failed to fetch sections' }, { status: 500 });
-    }
+  const user = await getCurrentUser();
+  if (!user || user.role !== 'ADMIN') {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
+  }
+
+  try {
+      const sections = await prisma.section.findMany({
+          orderBy: { name: 'asc' }, // Order alphabetically
+          ...(includeGradesAndGroups && { // Conditionally include
+              include: {
+                  grades: {
+                      include: {
+                          groups: true
+                      }
+                  }
+              }
+          })
+      });
+
+      // Ensure grades and groups are always arrays, even if empty:
+      const sectionsWithGrades = sections.map(section => ({
+          ...section,
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          grades: (section as any).grades ?? [], // Forzar la existencia de grades
+          //groups: section.grades.groups ?? [] // Ensure groups is always array
+      }));
+
+      return NextResponse.json(sectionsWithGrades);
+  } catch (error) {
+      console.error("Error fetching sections:", error);
+      return NextResponse.json({ error: 'Failed to fetch sections' }, { status: 500 });
+  }
 }
 
 // POST /api/v1/sections - Create a new section

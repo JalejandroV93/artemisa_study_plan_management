@@ -1,0 +1,201 @@
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+
+model User {
+  id           String    @id @default(uuid())
+  username     String    @unique // Nombre recibido de Phidias
+  document     String    @unique // Email o documento del JWT
+  fullName     String    // Nombre completo
+  email        String?   // Email 
+  role         Role      // ADMIN o TEACHER
+  password     String    // Derivado del documento del JWT
+  lastLogin    DateTime? // Última fecha de inicio de sesión
+  isBlocked    Boolean   @default(false) // Para bloquear usuarios
+  failedLoginAttempts Int @default(0) // Intentos fallidos de inicio de sesión
+  activityLogs ActivityLog[]
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  @@index([username])
+  @@index([document])
+  @@index([role]) // Add index for role-based filtering
+  @@index([isBlocked]) // Add index for filtering blocked users
+
+}
+
+enum Role {
+  ADMIN
+  TEACHER
+}
+
+model Section {
+  id        String    @id @default(uuid())
+  name      String    @unique
+  grades    Grade[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+
+model Grade {
+  id          String       @id @default(uuid())
+  name        String       // e.g., "Ninth", "Tenth"
+  colombianGrade Int?
+  sectionId   String
+  section     Section      @relation(fields: [sectionId], references: [id])
+  groups      Group[]
+  gradeOfferings GradeOffering[]
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  @@index([name])
+  @@index([sectionId])
+}
+
+
+model Group {
+  id          String       @id @default(uuid())
+  name        String?      // Opcional, e.g., "A", "B"
+  gradeId     String      
+  grade       Grade        @relation(fields: [gradeId], references: [id])
+  enrollments Enrollment[]
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  @@index([gradeId])
+}
+
+
+model Subject {
+  id                  String       @id @default(uuid())
+  name                String      
+  vision              String?
+  mission             String?
+  generalObjective    String?
+  specificObjectives  String[]
+  didactics           String?
+  crossCuttingProjects Project[]    @relation("SubjectProjects")
+  gradeOfferings      GradeOffering[]
+  isActive            Boolean      @default(true) // Estado para activar/desactivar
+  createdAt           DateTime     @default(now())
+  updatedAt           DateTime     @updatedAt
+
+  @@index([name])
+}
+
+
+model Project {
+  id          String     @id @default(uuid())
+  name        String    
+  description String?
+  subjects    Subject[]  @relation("SubjectProjects")
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  @@index([name])
+}
+
+
+model GradeOffering {
+  id            String       @id @default(uuid())
+  subjectId     String      
+  subject       Subject      @relation(fields: [subjectId], references: [id])
+  gradeId       String      
+  grade         Grade        @relation(fields: [gradeId], references: [id])
+  finalReport   String       // Competencia a alcanzar al finalizar
+  trimesters    Trimester[]
+  enrollments   Enrollment[]
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+
+  @@unique([subjectId, gradeId]) 
+  @@index([subjectId])
+  @@index([gradeId])
+}
+
+
+model Enrollment {
+  id              String       @id @default(uuid())
+  groupId         String      
+  group           Group        @relation(fields: [groupId], references: [id])
+  gradeOfferingId String      
+  gradeOffering   GradeOffering @relation(fields: [gradeOfferingId], references: [id])
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+
+  @@index([groupId])
+  @@index([gradeOfferingId])
+  @@unique([groupId, gradeOfferingId])
+}
+
+
+model Trimester {
+  id            String       @id @default(uuid())
+  gradeOfferingId String    
+  gradeOffering GradeOffering @relation(fields: [gradeOfferingId], references: [id])
+  number        Int          // 1, 2, 3
+  benchmarks    Benchmark[]
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+
+  @@index([gradeOfferingId])
+}
+
+
+model Benchmark {
+  id                String       @id @default(uuid())
+  trimesterId       String      
+  trimester         Trimester    @relation(fields: [trimesterId], references: [id])
+  description       String       // Descripción de la competencia
+  learningEvidence  String[]     // Evidencias de aprendizaje
+  thematicComponents String[]    // Componentes temáticos
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
+
+  @@index([trimesterId])
+}
+
+
+model ActivityLog {
+  id          String    @id @default(uuid())
+  userId      String
+  user        User      @relation(fields: [userId], references: [id])
+  action      String    // e.g., "VIEW", "CREATE", "UPDATE", "DELETE"
+  entity      String    // e.g., "Subject", "Benchmark"
+  entityId    String    // ID del registro afectado
+  details     Json?     // Detalles adicionales, como datos antes y después de la edición
+  timestamp   DateTime  @default(now())
+
+  @@index([userId])
+  @@index([entity, entityId])
+}
+
+model AcademicCalendarSettings {
+  id            String   @id @default(uuid())
+  academicYear  String   @unique  // e.g., "2023-2024", "2024", "2024-25" - make this unique
+  startDate     DateTime  //  Start date of the academic year.
+  endDate       DateTime  //  End date of the academic year.
+  trimesters    TrimesterSettings[] // Connect to a new model for individual trimesters.
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model TrimesterSettings {
+  id                       String                   @id @default(uuid())
+  academicCalendarSettings AcademicCalendarSettings @relation(fields: [academicCalendarSettingsId], references: [id], onDelete: Cascade) // Cascade to ensure deletions cleanup nicely
+  academicCalendarSettingsId String
+  number                   Int      // 1, 2, 3 (or 4, if needed) - make this a number
+  startDate                DateTime
+  endDate                  DateTime
+
+  @@index([academicCalendarSettingsId, number])  // Composite index for efficient querying
+  @@unique([academicCalendarSettingsId, number])  // Enforce uniqueness per academic year
+}
