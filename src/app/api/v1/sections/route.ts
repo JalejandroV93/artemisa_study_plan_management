@@ -6,6 +6,7 @@ import { getCurrentUser } from '@/lib/auth';
 
 const createSectionSchema = z.object({
   name: z.string().min(1).max(255),
+  order: z.number().int().optional(),
 });
 
 // GET /api/v1/sections - Get all sections
@@ -20,10 +21,13 @@ export async function GET(request: Request) {
 
   try {
       const sections = await prisma.section.findMany({
-          orderBy: { name: 'asc' }, // Order alphabetically
+          orderBy: { order: 'asc' }, // Order alphabetically
           ...(includeGradesAndGroups && { // Conditionally include
               include: {
                   grades: {
+                    orderBy: { 
+                      colombianGrade: 'asc'
+                      },
                       include: {
                           groups: true
                       }
@@ -55,11 +59,12 @@ export async function POST(request: Request) {
     }
   try {
     const body = await request.json();
-    const { name } = createSectionSchema.parse(body);
+    const { name, order } = createSectionSchema.parse(body);
 
     const newSection = await prisma.section.create({
       data: {
         name,
+        order
       },
     });
 

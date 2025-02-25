@@ -9,11 +9,11 @@ async function main() {
   try {
     // --- Sections ---
     const sectionsData: Prisma.SectionCreateInput[] = [
-      { name: 'Mi Taller' },
-      { name: 'Preescolar' },
-      { name: 'Primaria' },
-      { name: 'Middle School' },
-      { name: 'High School' },
+      { name: 'Mi Taller', order: 1 },
+      { name: 'Preescolar', order: 2 },
+      { name: 'Primaria', order: 3 },
+      { name: 'Middle School', order: 4 },
+      { name: 'High School', order: 5 },
     ];
 
     for (const sectionData of sectionsData) {

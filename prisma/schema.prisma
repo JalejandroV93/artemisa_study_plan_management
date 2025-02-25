@@ -40,6 +40,7 @@ model Section {
   id        String    @id @default(uuid())
   name      String    @unique
   grades    Grade[]
+  order     Int       @default(0) // Orden de la sección
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
 }

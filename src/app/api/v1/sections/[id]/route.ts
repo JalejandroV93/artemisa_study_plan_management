@@ -6,6 +6,7 @@ import { getCurrentUser } from '@/lib/auth';
 
 const updateSectionSchema = z.object({
   name: z.string().min(1).max(255),
+  order: z.number().int().optional(),
 });
 
 // GET /api/v1/sections/[id] - Get a section by ID
@@ -47,12 +48,13 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
     }
   try {
     const body = await request.json();
-    const { name } = updateSectionSchema.parse(body);
+    const { name, order } = updateSectionSchema.parse(body);
 
     const updatedSection = await prisma.section.update({
       where: { id: id },
       data: {
         name,
+        order
       },
     });
 

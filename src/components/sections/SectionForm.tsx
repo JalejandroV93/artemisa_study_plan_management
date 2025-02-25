@@ -12,6 +12,7 @@ import { useToast } from "@/hooks/use-toast"
 
 const createSectionSchema = z.object({
   name: z.string().min(1).max(255),
+  order: z.number().int().optional(),
 });
 
 type SectionFormValues = z.infer<typeof createSectionSchema>;
@@ -28,8 +29,14 @@ export function SectionForm({ section, onClose, onSuccess }: SectionFormProps) {
   const form = useForm<SectionFormValues>({
     resolver: zodResolver(createSectionSchema),
     defaultValues: section
-      ? { name: section.name }
-      : { name: "" },
+        ? {
+            name: section.name,
+            order: section.order ?? undefined
+          }
+        : {
+            name: "",
+            order: undefined, 
+          },
   });
 
   async function onSubmit(values: SectionFormValues) {
@@ -67,19 +74,40 @@ export function SectionForm({ section, onClose, onSuccess }: SectionFormProps) {
           name="name"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Section Name</FormLabel>
+              <FormLabel>Nombre de la sección</FormLabel>
               <FormControl>
-                <Input placeholder="Section Name" {...field} />
+                <Input placeholder="Ingresa el nombre de la sección" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
+        <FormField
+      control={form.control}
+      name="order"
+      render={({ field }) => (
+          <FormItem>
+          <FormLabel>Orden</FormLabel>
+          <FormControl>
+              <Input
+              type="number"
+              placeholder="Ingresa el orden en que se mostraran (optional)"
+              value={field.value === undefined ? '' : String(field.value)} // Handle undefined
+              onChange={(e) => {
+                  const value = e.target.value;
+                  field.onChange(value === '' ? undefined : Number(value)); // Important: Convert to number, handling empty string
+                }}
+              />
+          </FormControl>
+          <FormMessage />
+          </FormItem>
+      )}
+  />
         <div className="flex justify-end gap-2">
           <Button type="button" variant="outline" onClick={onClose}>
-            Cancel
+            Cancelar
           </Button>
-          <Button type="submit">{section ? "Update" : "Create"}</Button>
+          <Button type="submit">{section ? "Actualizar" : "Crear"}</Button>
         </div>
       </form>
     </Form>

@@ -94,17 +94,17 @@ export function GradeTable({ onEdit }: GradeTableProps) {
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>Grade Name (Intl)</TableHead>
-            <TableHead>Colombian Grade</TableHead>
-            <TableHead>Section</TableHead>
-            <TableHead className="text-right">Actions</TableHead>
+            <TableHead>Grado</TableHead>
+            <TableHead>Grado en Colombia</TableHead>
+            <TableHead>Sección</TableHead>
+            <TableHead className="text-right">Acciones</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {grades.length === 0 ? (
             <TableRow>
               <TableCell colSpan={4} className="text-center">
-                No data found.
+                No se encontraron grados.
               </TableCell>
             </TableRow>
           ) : (
@@ -117,14 +117,14 @@ export function GradeTable({ onEdit }: GradeTableProps) {
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <Button variant="ghost" className="h-8 w-8 p-0">
-                        <span className="sr-only">Open menu</span>
+                        <span className="sr-only">Abrir Menú</span>
                         <MoreHorizontal className="h-4 w-4" />
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
                       <DropdownMenuItem onClick={() => onEdit(grade)}>
                         <Edit className="h-4 w-4 mr-2" />
-                        Edit
+                        Editar
                       </DropdownMenuItem>
                       
                         <DropdownMenuItem
@@ -134,7 +134,7 @@ export function GradeTable({ onEdit }: GradeTableProps) {
                             setIsDeleteDialogOpen(true); // Open dialog
                             }}
                         >
-                          <Trash2 className="h-4 w-4 mr-2" /> Delete
+                          <Trash2 className="h-4 w-4 mr-2" /> Eliminar
                         </DropdownMenuItem>
                       
                     </DropdownMenuContent>

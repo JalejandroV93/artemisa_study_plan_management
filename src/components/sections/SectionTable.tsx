@@ -93,32 +93,34 @@ export function SectionTable({ onEdit }: SectionTableProps) {
         <Table>
             <TableHeader>
                 <TableRow>
-                    <TableHead>Section Name</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
+                <TableHead>#</TableHead>
+                    <TableHead>Nombre de la Sección</TableHead>
+                    <TableHead className="text-right">Acciones</TableHead>
                 </TableRow>
             </TableHeader>
             <TableBody>
                 {sections.length === 0 ? (
                     <TableRow>
                         <TableCell colSpan={2} className="text-center">
-                            No data found.
+                            No se encontraron datos.
                         </TableCell>
                     </TableRow>
                 ) : (
                     sections.map((section) => (
                         <TableRow key={section.id}>
+                            <TableCell>{section.order}</TableCell>
                             <TableCell>{section.name}</TableCell>
                             <TableCell className="text-right">
                                 <DropdownMenu>
                                     <DropdownMenuTrigger asChild>
                                         <Button variant="ghost" className="h-8 w-8 p-0">
-                                            <span className="sr-only">Open menu</span>
+                                            <span className="sr-only">Abrir Menú</span>
                                             <MoreHorizontal className="h-4 w-4" />
                                         </Button>
                                     </DropdownMenuTrigger>
                                     <DropdownMenuContent align="end">
                                         <DropdownMenuItem onClick={() => onEdit(section)}>
-                                            <Edit className="mr-2 h-4 w-4" /> Edit
+                                            <Edit className="mr-2 h-4 w-4" /> Editar
                                         </DropdownMenuItem>
 
                                         <DropdownMenuItem
@@ -128,7 +130,7 @@ export function SectionTable({ onEdit }: SectionTableProps) {
                                                 setIsDeleteDialogOpen(true); // Open the confirmation dialog
                                             }}
                                         >
-                                            <Trash2 className="mr-2 h-4 w-4" /> Delete
+                                            <Trash2 className="mr-2 h-4 w-4" /> Eliminar
                                         </DropdownMenuItem>
 
                                     </DropdownMenuContent>
@@ -143,19 +145,18 @@ export function SectionTable({ onEdit }: SectionTableProps) {
                 <AlertDialogContent>
                     <AlertDialogHeader>
                         <AlertDialogTitle>
-                            Are you absolutely sure?
+                            Estas seguro de eliminar?
                         </AlertDialogTitle>
                         <AlertDialogDescription>
-                            This action cannot be undone. This will
-                            permanently delete the section and all related grades.
+                            Esta acción no se puede deshacer. Esto eliminará permanentemente la sección.
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
-                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogCancel>Cancelar</AlertDialogCancel>
                         <AlertDialogAction
                             onClick={handleDelete}
                         >
-                            Continue
+                            Continar
                         </AlertDialogAction>
                     </AlertDialogFooter>
                 </AlertDialogContent>

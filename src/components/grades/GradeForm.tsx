@@ -120,9 +120,9 @@ export function GradeForm({ grade, onClose, onSuccess, sections }: GradeFormProp
           name="name"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Grade Name (International)</FormLabel>
+              <FormLabel>Nombre del Grado</FormLabel>
               <FormControl>
-                <Input placeholder="e.g., Ninth, Tenth" {...field} />
+                <Input placeholder="e.j., Noveno, Décimo" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -133,14 +133,12 @@ export function GradeForm({ grade, onClose, onSuccess, sections }: GradeFormProp
           name="colombianGrade"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Colombian Grade</FormLabel>
+              <FormLabel>Equivalente en Colombia</FormLabel>
               <FormControl>
-                {/* No type="number" on Input. Handled by onChange. */}
                 <Input
-                  placeholder="e.g., 9, 10"
+                  placeholder="e.j., 9, 10"
                   value={field.value === undefined ? '' : String(field.value)} // Handle undefined
                   onChange={(e) => {
-                    // Convert the input value to a number, handling empty string
                     const value = e.target.value;
                     field.onChange(value === '' ? undefined : Number(value));
                   }}
@@ -156,14 +154,14 @@ export function GradeForm({ grade, onClose, onSuccess, sections }: GradeFormProp
           name="sectionId"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Section</FormLabel>
+              <FormLabel>Sección</FormLabel>
               <Select
                 onValueChange={field.onChange}
                 defaultValue={field.value}
               >
                 <FormControl>
                   <SelectTrigger>
-                    <SelectValue placeholder="Select a section" />
+                    <SelectValue placeholder="Selecciona una Sección" />
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
@@ -181,9 +179,9 @@ export function GradeForm({ grade, onClose, onSuccess, sections }: GradeFormProp
 
         <div className="flex justify-end gap-2">
           <Button type="button" variant="outline" onClick={onClose}>
-            Cancel
+            Cancelar
           </Button>
-          <Button type="submit">{grade ? "Update" : "Create"}</Button>
+          <Button type="submit">{grade ? "Actualizar" : "Crear"}</Button>
         </div>
       </form>
     </Form>
