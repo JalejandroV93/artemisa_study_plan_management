@@ -27,18 +27,36 @@ import { useDebounce } from "use-debounce";
 import { useRouter } from "next/navigation";
 
 
-// --- Zod Schemas (using Prisma types where possible) ---
-const createSubjectSchema = z.object({
-  name: z.string().min(1, "Subject name is required"),
-  vision: z.string().optional(),
-  mission: z.string().optional(),
-  generalObjective: z.string().optional(),
-  specificObjectives: z.array(z.string()).optional(),
-  didactics: z.array(z.string()).optional(),
-  crossCuttingProjects: z.array(z.string().uuid()).optional(),  // Array of Project IDs
-  isActive: z.boolean().optional(),
-  gradeOfferings: z.record(z.string(), gradeOfferingSchema).default({}), // Key is gradeId, value is GradeOfferingForm data
+// Definir los esquemas
+export const benchmarkSchema = z.object({
+    description: z.string().min(1, "La descripción del benchmark es requerida"),
+    learningEvidence: z.array(z.string()).optional(),
+    thematicComponents: z.array(z.string()).optional(),
 });
+
+export const trimesterFormSchema = z.object({
+    benchmarks: z.array(benchmarkSchema).optional(),
+});
+
+export const gradeOfferingSchema = z.object({
+    finalReport: z.string().optional(),
+    trimesters: z.record(z.string(), trimesterFormSchema),
+});
+
+const createSubjectSchema = z.object({
+    name: z.string().min(1, "El nombre de la materia es requerido"),
+    vision: z.string().optional(),
+    mission: z.string().optional(),
+    generalObjective: z.string().optional(),
+    specificObjectives: z.array(z.string()).optional(),
+    didactics: z.array(z.string()).optional(),
+    crossCuttingProjects: z.array(z.string().uuid()).optional(),
+    isActive: z.boolean().optional(),
+    gradeOfferings: z.record(z.string(), gradeOfferingSchema).default({}),
+});
+
+// Inferir el tipo de los valores del formulario
+export type SubjectFormValues = z.infer<typeof createSubjectSchema>;
 
 const updateSubjectSchema = createSubjectSchema.partial(); // All fields optional for updates.
 
@@ -65,34 +83,36 @@ export function SubjectForm({ subject, onClose }: SubjectFormProps) {
   const methods = useForm<SubjectFormValues>({
     resolver: zodResolver(subject ? updateSubjectSchema : createSubjectSchema),
     defaultValues: subject
-    ? {
-        ...subject,
-        specificObjectives: subject.specificObjectives || [],
-        crossCuttingProjects: subject.crossCuttingProjects.map((p) => p.id),
-        gradeOfferings: subject.gradeOfferings.reduce((acc, curr) => {
-          const trimestersData = curr.trimesters.reduce((trimesterAcc, trimester) => ({
-            ...trimesterAcc,
-            [trimester.number]: {
-              benchmarks: trimester.benchmarks,
-            },
-          }), {} as any); // Type assertion for nested structure
-
-          return {
-            ...acc,
-            [curr.gradeId]: {
-              finalReport: curr.finalReport,
-              trimesters: trimestersData,
-            },
-          };
-        }, {} as Record<string, any>), // Top-level type assertion
-      }
-    : {
-      name: "",
-      specificObjectives: [],  // Initialize empty arrays.
-      crossCuttingProjects: [],
-      gradeOfferings: {}
-      },
-  });
+        ? {
+              ...subject,
+              specificObjectives: subject.specificObjectives || [],
+              crossCuttingProjects: subject.crossCuttingProjects.map((p) => p.id),
+              gradeOfferings: subject.gradeOfferings.reduce((acc, curr) => {
+                  const trimestersData = curr.trimesters.reduce(
+                      (trimesterAcc, trimester) => ({
+                          ...trimesterAcc,
+                          [trimester.number]: {
+                              benchmarks: trimester.benchmarks,
+                          },
+                      }),
+                      {}
+                  );
+                  return {
+                      ...acc,
+                      [curr.gradeId]: {
+                          finalReport: curr.finalReport,
+                          trimesters: trimestersData,
+                      },
+                  };
+              }, {} as Record<string, any>),
+          }
+        : {
+              name: "",
+              specificObjectives: [],
+              crossCuttingProjects: [],
+              gradeOfferings: {},
+          },
+});
 
   // --- Data Fetching ---
   useEffect(() => {

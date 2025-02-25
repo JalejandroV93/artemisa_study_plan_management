@@ -1,89 +1,116 @@
-// src/components/subjects/TrimesterForm.tsx
-"use client"
+"use client";
 
 import { useFormContext } from "react-hook-form";
 import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
 import { DynamicArrayInput } from "@/components/ui/DynamicArrayInput";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import { z } from "zod";
+import { useFieldArray } from "react-hook-form";
 
-// Define the Zod schema for a single Benchmark:
-const benchmarkSchema = z.object({
-    description: z.string().min(1, "Benchmark description is required"),
-    learningEvidence: z.array(z.string()).optional(), // Assuming an array of strings
+// Esquema de un Benchmark
+export const benchmarkSchema = z.object({
+    description: z.string().min(1, "La descripción del benchmark es requerida"),
+    learningEvidence: z.array(z.string()).optional(),
     thematicComponents: z.array(z.string()).optional(),
 });
 
-// Define the Zod schema for the entire Trimester form.  This is used within the *GradeOfferingForm*.
-export const trimesterFormSchema = z.object({ // Export this for use in GradeOfferingForm
+// Esquema del formulario de Trimester
+export const trimesterFormSchema = z.object({
     benchmarks: z.array(benchmarkSchema).optional(),
 });
 
-// Removed unused type TrimesterFormValues
-
 interface TrimesterFormProps {
-  trimesterNumber: number;
-  gradeId: string; // Add gradeId prop
+    trimesterNumber: number;
+    gradeId: string;
 }
 
-
 export function TrimesterForm({ trimesterNumber, gradeId }: TrimesterFormProps) {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { control } = useFormContext<any>(); // Using 'any' temporarily, will be replaced with a more specific type later.
-  const fieldName = `gradeOfferings.${gradeId}.trimesters.${trimesterNumber}`;
+    const { control } = useFormContext();
+    const fieldName = `gradeOfferings.${gradeId}.trimesters.${trimesterNumber}`;
 
-  return (
-    <div className="space-y-4">
-      <h4 className="font-medium">Trimester {trimesterNumber}</h4>
+    // Usar useFieldArray para manejar el arreglo de benchmarks
+    const { fields, append, remove } = useFieldArray({
+        control,
+        name: `${fieldName}.benchmarks`,
+    });
 
-        <FormField
-            control={control}
-            name={`${fieldName}.benchmarks`}
-            render={({ field }) => (
-                <FormItem>
-                <FormLabel>Benchmark</FormLabel>
-                <FormControl>
-                    <DynamicArrayInput
-                        values={field.value || []}
-                        onChange={(newValues) => field.onChange(newValues)}
-                        placeholder="Add a learning evidence..."
+    return (
+        <div className="space-y-4">
+            <h4 className="font-medium">Trimestre {trimesterNumber}</h4>
+            {fields.map((field, index) => (
+                <div key={field.id} className="border p-4 rounded space-y-4">
+                    {/* Campo para la descripción del benchmark */}
+                    <FormField
+                        control={control}
+                        name={`${fieldName}.benchmarks.${index}.description`}
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Descripción del Benchmark</FormLabel>
+                                <FormControl>
+                                    <Input placeholder="Ingresa la descripción" {...field} />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
                     />
-                </FormControl>
-                <FormMessage />
-                </FormItem>
-            )}
-        />
-        <FormField
-            control={control}
-            name={`${fieldName}.learningEvidence`}
-            render={({ field }) => (
-                <FormItem>
-                    <DynamicArrayInput
-                        values={field.value || []}
-                        onChange={(newValues) => field.onChange(newValues)}
-                        label="Learning Evidence"
-                        placeholder="Add learning evidence..."
+                    {/* Campo para learningEvidence */}
+                    <FormField
+                        control={control}
+                        name={`${fieldName}.benchmarks.${index}.learningEvidence`}
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Evidencias de Aprendizaje</FormLabel>
+                                <FormControl>
+                                    <DynamicArrayInput
+                                        values={field.value || []}
+                                        onChange={(newValues) => field.onChange(newValues)}
+                                        placeholder="Añade una evidencia de aprendizaje..."
+                                    />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
                     />
-                <FormMessage />
-                </FormItem>
-
-            )}
-        />
-
-        <FormField
-            control={control}
-            name={`${fieldName}.thematicComponents`}
-            render={({ field }) => (
-                <FormItem>
-                  <DynamicArrayInput
-                      values={field.value || []}
-                      onChange={(newValues) => field.onChange(newValues)}
-                      label="Thematic Components"
-                      placeholder="Add component..."
-                  />
-                <FormMessage />
-                </FormItem>
-            )}
-        />
-    </div>
-  );
+                    {/* Campo para thematicComponents */}
+                    <FormField
+                        control={control}
+                        name={`${fieldName}.benchmarks.${index}.thematicComponents`}
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Componentes Temáticos</FormLabel>
+                                <FormControl>
+                                    <DynamicArrayInput
+                                        values={field.value || []}
+                                        onChange={(newValues) => field.onChange(newValues)}
+                                        placeholder="Añade un componente..."
+                                    />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                    <Button
+                        type="button"
+                        variant="destructive"
+                        onClick={() => remove(index)}
+                    >
+                        Eliminar Benchmark
+                    </Button>
+                </div>
+            ))}
+            <Button
+                type="button"
+                onClick={() =>
+                    append({
+                        description: "",
+                        learningEvidence: [],
+                        thematicComponents: [],
+                    })
+                }
+            >
+                Agregar Benchmark
+            </Button>
+        </div>
+    );
 }
