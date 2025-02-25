@@ -1,6 +1,4 @@
 // src/components/subjects/GeneralInformationForm.tsx
-
-
 "use client";
 
 import { useFormContext } from "react-hook-form";
@@ -8,24 +6,26 @@ import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/comp
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Plus, Minus } from "lucide-react";
-import { SubjectFormValues } from "./FormSchemas";
+import { PlusCircle, MinusCircle } from "lucide-react"; // More descriptive icons
+import { SubjectFormValues, UpdateSubjectFormValues } from "./FormSchemas"; // Correct type
+
+type FormValues = SubjectFormValues | UpdateSubjectFormValues;
 
 export function GeneralInformationForm() {
-  const { control, watch, setValue } = useFormContext<SubjectFormValues>(); // Correct type
-  const specificObjectives = watch("specificObjectives") || [];
+  const { control, watch, setValue } = useFormContext<FormValues>(); // Correct type
+  const specificObjectives = watch("specificObjectives");
 
   return (
-    // ... (rest of your GeneralInformationForm code, unchanged.  Use the correct context type!)
-     <div className="space-y-6">
+    <div className="space-y-6">
+      {/* ... (rest of your input fields, unchanged) ... */}
       <FormField
         control={control}
         name="name"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Nombre de la Asignatura</FormLabel>
+            <FormLabel>Subject Name</FormLabel>
             <FormControl>
-              <Input placeholder="Ingrese el nombre de la asignatura" {...field} />
+              <Input placeholder="Enter subject name" {...field} />
             </FormControl>
             <FormMessage />
           </FormItem>
@@ -37,9 +37,9 @@ export function GeneralInformationForm() {
         name="vision"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Visión</FormLabel>
+            <FormLabel>Vision</FormLabel>
             <FormControl>
-              <Textarea placeholder="Ingrese la visión" {...field} />
+              <Textarea placeholder="Enter vision" {...field} />
             </FormControl>
             <FormMessage />
           </FormItem>
@@ -51,9 +51,9 @@ export function GeneralInformationForm() {
         name="mission"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Misión</FormLabel>
+            <FormLabel>Mission</FormLabel>
             <FormControl>
-              <Textarea placeholder="Ingrese la misión" {...field} />
+              <Textarea placeholder="Enter mission" {...field} />
             </FormControl>
             <FormMessage />
           </FormItem>
@@ -65,9 +65,9 @@ export function GeneralInformationForm() {
         name="generalObjective"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Objetivo General</FormLabel>
+            <FormLabel>General Objective</FormLabel>
             <FormControl>
-              <Textarea placeholder="Ingrese el objetivo general" {...field} />
+              <Textarea placeholder="Enter general objective" {...field} />
             </FormControl>
             <FormMessage />
           </FormItem>
@@ -75,8 +75,8 @@ export function GeneralInformationForm() {
       />
 
       <div>
-        <FormLabel>Objetivos Específicos</FormLabel>
-        {specificObjectives.map((_, index) => (
+        <FormLabel>Specific Objectives</FormLabel>
+        {specificObjectives?.map((_, index) => (
           <FormField
             key={index}
             control={control}
@@ -84,7 +84,7 @@ export function GeneralInformationForm() {
             render={({ field }) => (
               <FormItem className="flex items-center space-x-2 mt-2">
                 <FormControl>
-                  <Input placeholder={`Objetivo específico ${index + 1}`} {...field} />
+                  <Input placeholder={`Specific objective ${index + 1}`} {...field} />
                 </FormControl>
                 <Button
                   type="button"
@@ -93,10 +93,10 @@ export function GeneralInformationForm() {
                   onClick={() => {
                     const newObjectives = [...specificObjectives];
                     newObjectives.splice(index, 1);
-                    setValue("specificObjectives", newObjectives); // Use setValue
+                    setValue("specificObjectives", newObjectives);
                   }}
                 >
-                  <Minus className="h-4 w-4" />
+                  <MinusCircle className="h-4 w-4" />
                 </Button>
               </FormItem>
             )}
@@ -108,11 +108,11 @@ export function GeneralInformationForm() {
           size="sm"
           className="mt-2"
           onClick={() => {
-            setValue("specificObjectives", [...specificObjectives, ""]); // Use setValue
+            setValue("specificObjectives", [...(specificObjectives || []), ""]);
           }}
         >
-          <Plus className="h-4 w-4 mr-2" />
-          Agregar Objetivo Específico
+          <PlusCircle className="h-4 w-4 mr-2" />
+          Add Specific Objective
         </Button>
       </div>
 
@@ -121,33 +121,14 @@ export function GeneralInformationForm() {
         name="didactics"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Didáctica</FormLabel>
+            <FormLabel>Didactics</FormLabel>
             <FormControl>
-              <Textarea placeholder="Ingrese la didáctica" {...field} />
+              <Textarea placeholder="Enter didactics" {...field} />
             </FormControl>
             <FormMessage />
           </FormItem>
         )}
       />
-      <FormField
-        control={control}
-        name="crossCuttingProjects"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Proyectos Transversales</FormLabel>
-            <FormControl>
-            <Input
-                  placeholder="Ingrese los proyectos transversales"
-                  {...field}
-                  // Ensure the field value is always an array of strings
-                  value={field.value ? field.value.join(',') : ''}
-                  onChange={(e) => field.onChange(e.target.value.split(','))}
-                />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-    </div>
+        </div>
   );
 }

@@ -3,23 +3,23 @@ import { z } from "zod";
 
 // --- Schemas ---
 export const benchmarkSchema = z.object({
-  id: z.string().optional(), // Include ID for updates
+  id: z.string().uuid(), // ALWAYS include ID for array items!
   description: z.string().min(1, "Benchmark description is required"),
   learningEvidence: z.array(z.string()).optional(),
   thematicComponents: z.array(z.string()).optional(),
 });
 
 export const trimesterFormSchema = z.object({
-  number: z.number(),   //Added Number
-  benchmarks: z.array(benchmarkSchema).optional(),
+  id: z.string().uuid(), // ALWAYS include ID for array items!
+  number: z.number(), // Keep number
+  benchmarks: z.array(benchmarkSchema).optional(), // Optional at this level.
 });
 
 export const gradeOfferingSchema = z.object({
-  id: z.string().optional(),// Include ID for updates.
-  gradeId: z.string(),      //Keep gradeId
+  id: z.string().uuid().optional(), // Keep ID, use UUIDs.
+  gradeId: z.string().uuid(),      // Keep gradeId.  This is important.
   finalReport: z.string().optional(),
-  trimesters: z.record(z.string(), trimesterFormSchema).optional(), // Make trimesters optional *here*
-  groups: z.array(z.object({ name: z.string()})).optional() // Group
+  trimesters: z.array(trimesterFormSchema), // Use array, NOT record, for trimesters
 });
 
 // Main Subject Schema
@@ -29,22 +29,20 @@ const baseSubjectSchema = z.object({
   mission: z.string().optional(),
   generalObjective: z.string().optional(),
   specificObjectives: z.array(z.string()).optional(),
-  didactics: z.string().optional(), //Changed to string
-  crossCuttingProjects: z.array(z.string().uuid()).optional(),  // Array of Project IDs
+  didactics: z.string().optional(),
+  crossCuttingProjects: z.array(z.string().uuid()).optional(),
   isActive: z.boolean().optional(),
 });
 
-
-// Create Subject Schema (stricter, for POST)
+// Create Subject Schema
 export const createSubjectSchema = baseSubjectSchema.extend({
-  gradeOfferings: z.record(z.string(), gradeOfferingSchema).default({}), // Keep .default({})
+  gradeOfferings: z.array(gradeOfferingSchema).default([]), // Use array.default([])
 });
 
-// Update Subject Schema (more permissive, for PUT)
+// Update Subject Schema
 export const updateSubjectSchema = baseSubjectSchema.extend({
-    gradeOfferings: z.record(z.string(), gradeOfferingSchema).optional(), // Optional for updates
-}).partial();  // .partial() makes all fields of the *base* schema optional.
+  gradeOfferings: z.array(gradeOfferingSchema).optional(),
+}).partial();
 
-
-export type SubjectFormValues = z.infer<typeof createSubjectSchema>; // Export Types
-export type UpdateSubjectFormValues = z.infer<typeof updateSubjectSchema>
+export type SubjectFormValues = z.infer<typeof createSubjectSchema>;
+export type UpdateSubjectFormValues = z.infer<typeof updateSubjectSchema>;

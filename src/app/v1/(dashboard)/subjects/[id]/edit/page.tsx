@@ -41,8 +41,10 @@ export default function EditSubjectPage() {
             const errorData = await res.json(); // Get error details
             throw new Error(errorData.error || "Failed to fetch subject");
         }
-        const data:Subject = await res.json();
-        setSubject(data);
+        const data = await res.json();
+        // Add default empty gradeOfferings property if it's missing
+        const subjectWithGradeOfferings = { ...data, gradeOfferings: data.gradeOfferings ?? [] };
+        setSubject(subjectWithGradeOfferings);
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } catch (error: any) {
         console.error("Error fetching subject:", error);
