@@ -5,6 +5,12 @@
 
 **Tagline:** Where art and education transform lives.
 
+**Significado y Conexión:**
+- "Arte": Hace referencia directa al arte como pilar fundamental del Liceo Taller San Miguel, presente en todas sus manifestaciones y como dispositivo pedagógico.
+- "Misa": Evoca la idea de una misión o propósito elevado, alineado con el enfoque humanista y trascendente de formar creadores de cultura y protagonistas de la historia.
+- Conexión con Picasso: Artemisa suena sofisticado y artístico, resonando con el nombre de la IA "Picasso", que lleva el nombre de un ícono del arte. Juntos, sugieren una colaboración entre la creatividad humana y la inteligencia artificial.
+- Simbolismo: En la mitología griega, Artemisa es la diosa de la caza, la naturaleza y la protección, lo que podría interpretarse como una metáfora de la búsqueda del conocimiento y la protección del desarrollo integral de los estudiantes.
+  
 ---
 
 ## Table of Contents
